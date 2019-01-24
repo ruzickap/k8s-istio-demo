@@ -24,18 +24,17 @@ NODE_IP[1]=`terraform output -json | jq -r '.vms_public_ip.value[1]'`
 NODE_IP[2]=`terraform output -json | jq -r '.vms_public_ip.value[2]'`
 
 
-test -f $HOME/.ssh/id_rsa || ( install -m 0700 -d $HOME/.ssh && ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N "" )
-
 echo "# Fill the /etc/hosts on each cluster node"
 for NODE in ${NODE_IP[*]}; do
   ssh -t ${MYUSER}@$NODE ${SSH_ARGS} "sudo /bin/bash -c '
-    sed -i 's/^#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' /etc/sysctl.d/99-sysctl.conf
+    sed -i \"s/^#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/\" /etc/sysctl.d/99-sysctl.conf
     sysctl --quiet --system
     cat >> /etc/hosts << EOF2
 ${NODE_IP[0]} node1 node1.cluster.local
 ${NODE_IP[1]} node2 node2.cluster.local
 ${NODE_IP[2]} node3 node3.cluster.local
-EOF2'"
+EOF2
+'"
 done
 
 echo "# Install kubernetes Master"
