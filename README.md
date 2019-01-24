@@ -4,16 +4,15 @@ Find below few commands showing basics of Istio...
 
 ## Requirements
 
-* [Docker](https://www.docker.com/) or [Podman](https://podman.io/)
-* [Ansible](https://www.ansible.com/)
-* [Terraform](https://www.terraform.io/)
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (kubernetes-client package)
+* [Helm](https://helm.sh/)
+* [Terraform](https://www.terraform.io/)
 
 ## Provision VMs in OpenStack
 
 Start 3 VMs (one master and 2 workers) where the k8s will be installed.
 
-```
+```bash
 git clone https://github.com/ruzickap/k8s-istio-demo
 cd k8s-istio-demo
 
@@ -29,7 +28,7 @@ openstack_user_name                                = "pruzicka"
 openstack_user_domain_name                         = "ldap_mirantis"
 EOF
 
-terraform init -var-file=terrafrom/openstack/terraform.tfvars terrafrom/openstack
+terraform init  -var-file=terrafrom/openstack/terraform.tfvars terrafrom/openstack
 terraform apply -var-file=terrafrom/openstack/terraform.tfvars terrafrom/openstack
 ```
 
@@ -39,7 +38,7 @@ At the end of the output you should see 3 IP addresses which should be accessibl
 
 Install k8s using kubeadm.
 
-```
+```bash
 ./install-k8s-kubeadm.sh
 ```
 
@@ -47,7 +46,7 @@ Install k8s using kubeadm.
 
 Install helm (tiller) to k8s cluster
 
-```
+```bash
 kubectl create serviceaccount tiller --namespace kube-system
 kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
 helm init --wait --service-account tiller
