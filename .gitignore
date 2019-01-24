@@ -8,8 +8,9 @@
 *.tfvars
 # Terraform crash log
 crash.log
-
-demo-magic.sh
+# Temporary files
 files
+# Kubernetes kubeconfig file
 kubeconfig.conf
+# nohup output
 nohup.out
