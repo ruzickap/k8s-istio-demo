@@ -14,7 +14,7 @@ cat > /etc/apt/sources.list.d/kubernetes.list << EOF2
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF2
 apt-get update -qq
-apt-get install -y -qq --no-install-recommends docker.io kubelet=${KUBERNETES_VERSION}-00 kubeadm=${KUBERNETES_VERSION}-00 kubectl=${KUBERNETES_VERSION}-00
+apt-get install -y -qq --no-install-recommends chrony docker.io kubelet=${KUBERNETES_VERSION}-00 kubeadm=${KUBERNETES_VERSION}-00 kubectl=${KUBERNETES_VERSION}-00
 systemctl enable docker.service
 "
 
