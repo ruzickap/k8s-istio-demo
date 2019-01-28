@@ -92,6 +92,23 @@ resource "openstack_compute_floatingip_associate_v2" "floatingip-associate" {
   instance_id = "${element(openstack_compute_instance_v2.vms.*.id, count.index)}"
 }
 
+# Wait for VMs to be fully up (accessible by ssh)
+resource "null_resource" "vms" {
+  count             = "${var.vm_nodes * var.environment_count}"
+  depends_on        = ["openstack_compute_floatingip_associate_v2.floatingip-associate"]
+
+  connection {
+    type = "ssh"
+    host = "${element(openstack_networking_floatingip_v2.floatingip.*.address, count.index)}"
+    #private_key = "${file("~/.ssh/id_rsa")}"
+    user = "${var.username}"
+    agent = true
+  }
+  provisioner "remote-exec" {
+    inline = [ ]
+  }
+}
+
 output "vms_name" {
   value = "${openstack_compute_instance_v2.vms.*.name}"
 }
