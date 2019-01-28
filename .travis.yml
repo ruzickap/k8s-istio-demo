@@ -2,23 +2,38 @@ sudo: required
 
 # We need the systemd for the kubeadm and it's default from 16.04+
 dist: xenial
-# This moves Kubernetes specific config files.
+
+addons:
+  apt:
+    packages:
+      - jq
+      - socat
+
 env:
   global:
     - CHANGE_MINIKUBE_NONE_USER=true
-    # curl --silent "https://api.github.com/repos/helm/helm/releases/latest" | sed -n 's/.*"tag_name": "v\([^"]*\)",/\1/p'
-    - HELM_VERSION="2.12.3"
     # curl --silent "https://api.github.com/repos/kubernetes/minikube/releases/latest" | sed -n 's/.*"tag_name": "v\([^"]*\)",/\1/p'
-    - MINIKUBE_VERSION="0.30.0"
-    - KUBERNETES_VERSION="1.12.0"
+    - KUBERNETES_VERSION="1.13.2"
+    # curl -L -s https://api.github.com/repos/istio/istio/releases/latest | grep tag_name | sed "s/ *\"tag_name\": *\"\\(.*\\)\",*/\\1/"
+    - ISTIO_VERSION="1.0.5"
+
+install:
+  - gem install awesome_bot
+  - TERRAFORM_LATEST_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')
+  - curl --silent --location https://releases.hashicorp.com/terraform/${TERRAFORM_LATEST_VERSION}/terraform_${TERRAFORM_LATEST_VERSION}_linux_amd64.zip --output /tmp/terraform_linux_amd64.zip
+  - sudo unzip -o /tmp/terraform_linux_amd64.zip -d /usr/local/bin/
+  - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
+  - npm install -g markdownlint-cli
 
 before_script:
+  # Generate ssh key if needed
+  - test -f $HOME/.ssh/id_rsa || ( install -m 0700 -d $HOME/.ssh && ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N "" )
   # Make root mounted as rshared to fix kube-dns issues.
   - sudo mount --make-rshared /
   # Download kubectl, which is a requirement for using minikube.
   - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
   # Download minikube.
-  - curl -Lo minikube https://storage.googleapis.com/minikube/releases/v${MINIKUBE_VERSION}/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
+  - curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
   - sudo minikube start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=v${KUBERNETES_VERSION}
   # Fix the kubectl context, as it's often stale.
   - minikube update-context
@@ -26,6 +41,24 @@ before_script:
   - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
 
 script:
-  - kubectl cluster-info
-  - curl -SsL https://storage.googleapis.com/kubernetes-helm/helm-v${HELM_VERSION}-linux-amd64.tar.gz | sudo tar --strip-components 1 -C /usr/local/bin/ -xzf - linux-amd64/helm
-  - sed -n '/^```bash/,/^```/p' README.md | sed '/^```*/d' | sed -n '/^export KUBECONFIG=/,$p' | sh -x
+  # Terraform checks
+  - |
+    cat > terraform.tfvars << EOF
+    openstack_instance_image_name  = "test"
+    openstack_password             = "test"
+    openstack_tenant_name          = "test"
+    openstack_user_domain_name     = "test"
+    openstack_user_name            = "test"
+    openstack_auth_url             = "test"
+    openstack_instance_flavor_name = "test"
+    EOF
+    terraform init     -var-file=terraform.tfvars terrafrom/openstack
+    terraform validate -var-file=terraform.tfvars terrafrom/openstack
+  # Link Checks
+  - awesome_bot --white-list "elasticsearch-client,localhost,ic-us.ssl.mirantis.net,charts.rook.io,raw.githubusercontent.com/upmc-enterprises/elasticsearch-operator/master/charts" --allow-dupe --allow-redirect --skip-save-results `find . -name "*.md"`
+  # Markdown check
+  - |
+    echo '"line-length": false' > markdownlint_config.json
+    markdownlint -c markdownlint_config.json README.md
+  # k8s commands
+  - sed -n '/^```bash/,/^```/p' README.md | sed '/^```*/d' | sed -n '/^kubectl get nodes -o wide/,$p' | sh -eux
