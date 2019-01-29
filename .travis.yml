@@ -61,4 +61,4 @@ script:
     echo '"line-length": false' > markdownlint_config.json
     markdownlint -c markdownlint_config.json README.md
   # k8s commands
-  - sed -n '/^```bash/,/^```/p' README.md | sed '/^```*/d' | sed -n '/^kubectl get nodes -o wide/,$p' | sh -eux
+  - sed -n '/^```bash/,/^```/p' README.md | sed '/^```*/d' | sed -n '/^kubectl get nodes -o wide/,$p' | sed '/^helm repo add rook-stable/,/kubectl get -l app=fluent-bit svc,pods --all-namespaces -o wide/d' | sh -eux

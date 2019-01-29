@@ -1,8 +1,8 @@
 # Kubernetes with Istio running on top of OpenStack demo
 
-Find below few commands showing basics of Istio...
+[![Build Status](https://travis-ci.com/ruzickap/k8s-istio-demo.svg?branch=master)](https://travis-ci.com/ruzickap/k8s-istio-demo)
 
-[TOC]
+Find below few commands showing basics of Istio...
 
 ## Requirements
 
@@ -243,7 +243,7 @@ sleep 5
 The deployment with `rook-ceph-tools` was created.
 
 ```bash
-kubectl get deploy,po --namespace=rook-ceph -o wide -l app=rook-ceph-tools
+kubectl get deployment,pods --namespace=rook-ceph -o wide -l app=rook-ceph-tools
 ```
 
 Output:
@@ -627,6 +627,31 @@ helm install --wait stable/fluent-bit --name=fluent-bit --namespace=logging \
   --set backend.es.tls_verify=off
 ```
 
+Check fluent-bit installation:
+
+```bash
+kubectl get -l app=fluent-bit svc,pods --all-namespaces -o wide
+```
+
+Output:
+
+```shell
+NAMESPACE   NAME                                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE       SELECTOR
+logging     service/fluent-bit-fluent-bit-metrics   ClusterIP   10.110.236.121   <none>        2020/TCP   7h        app=fluent-bit,release=fluent-bit
+
+NAMESPACE   NAME                              READY     STATUS    RESTARTS   AGE       IP            NODE
+logging     pod/fluent-bit-fluent-bit-dcg4s   1/1       Running   0          7h        10.244.1.15   pruzicka-k8s-istio-demo-node03
+logging     pod/fluent-bit-fluent-bit-tfqdb   1/1       Running   0          7h        10.244.0.11   pruzicka-k8s-istio-demo-node01
+logging     pod/fluent-bit-fluent-bit-tnxj2   1/1       Running   0          7h        10.244.2.13   pruzicka-k8s-istio-demo-node02
+```
+
+Configure port forwarding for Kibana
+
+```bash
+# Kibana UI - https://localhost:5601
+kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+```
+
 ## Install Istio
 
 Either download Istio directly from [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases) or get the latest version by using curl.
@@ -646,7 +671,7 @@ cd istio*
 Install Istio using helm.
 
 ```bash
-helm install --wait install/kubernetes/helm/istio --name istio --namespace istio-system \
+helm install --wait --name istio --namespace istio-system install/kubernetes/helm/istio \
   --set gateways.istio-ingressgateway.type=NodePort \
   --set gateways.istio-egressgateway.type=NodePort \
   --set grafana.enabled=true \
@@ -725,6 +750,23 @@ kubectl apply -f ../../yaml/fluentd-istio.yaml
 
 ## Istio example
 
+Let's see how Istio can be used and how it looks.
+
+### Architecture
+
+Short notes about Istio architecture.
+
+![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg)
+
+* Envoy - is a high-performance proxy to mediate all inbound and outbound traffic for all services in the service mesh.
+* Mixer - enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services.
+* Pilot - provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing.
+* Citadel - provides strong service-to-service and end-user authentication with built-in identity and credential management.
+
+![Traffic Management with Istio](https://istio.io/docs/concepts/traffic-management/TrafficManagementOverview.svg)
+
+![Istio Security Architecture](https://istio.io/docs/concepts/security/architecture.svg)
+
 Let the default namespace to use istio injection.
 
 ```bash
@@ -751,6 +793,25 @@ rook-ceph          Active    34m
 rook-ceph-system   Active    36m
 ```
 
+Configure port forwarding for Istio services
+
+```bash
+# Jaeger - http://localhost:16686
+kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
+
+# Prometheus UI - http://localhost:9090/graph
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
+
+# Grafana - http://localhost:3000/dashboard/db/istio-mesh-dashboard
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
+
+# Kiali UI - http://localhost:20001
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001 &
+
+# Servicegraph UI - http://localhost:8088/force/forcegraph.html
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}') 8088:8088 &
+```
+
 Deploy the demo application [https://istio.io/docs/examples/bookinfo/](https://istio.io/docs/examples/bookinfo/)
 
 ```bash
@@ -761,6 +822,7 @@ Define the ingress gateway for the application
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
+sleep 150
 ```
 
 Check the deployed application
@@ -810,8 +872,8 @@ Determining the ingress IP and ports when using a node port
 ```bash
 export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
 export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
-# export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o 'jsonpath={.items[0].status.hostIP}')
-export INGRESS_HOST=$(terraform output -json -state=../../terraform.tfstate | jq -r '.vms_public_ip.value[0]')
+export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o 'jsonpath={.items[0].status.hostIP}')
+# export INGRESS_HOST=$(terraform output -json -state=../../terraform.tfstate | jq -r '.vms_public_ip.value[0]')
 export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 echo "$INGRESS_PORT | $SECURE_INGRESS_PORT | $INGRESS_HOST | $GATEWAY_URL"
 ```
@@ -838,7 +900,7 @@ Output:
 
 * Jaeger [https://istio.io/docs/tasks/telemetry/distributed-tracing/](https://istio.io/docs/tasks/telemetry/distributed-tracing/)
 
-```bash
+```shell
 kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
 ```
 
@@ -846,7 +908,7 @@ Link: [http://localhost:16686](http://localhost:16686)
 
 * Prometheus UI [https://istio.io/docs/tasks/telemetry/querying-metrics/](https://istio.io/docs/tasks/telemetry/querying-metrics/)
 
-```bash
+```shell
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
 ```
 
@@ -854,7 +916,7 @@ Link: [http://localhost:9090/graph](http://localhost:9090/graph)
 
 * Grafana [https://istio.io/docs/tasks/telemetry/using-istio-dashboard/](https://istio.io/docs/tasks/telemetry/using-istio-dashboard/)
 
-```bash
+```shell
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
 ```
 
@@ -862,7 +924,7 @@ Link: [http://localhost:3000/dashboard/db/istio-mesh-dashboard](http://localhost
 
 * Kiali UI [https://istio.io/docs/tasks/telemetry/kiali/](https://istio.io/docs/tasks/telemetry/kiali/)
 
-```bash
+```shell
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001 &
 ```
 
@@ -870,7 +932,7 @@ Link: [http://localhost:20001](http://localhost:20001) (admin/admin)
 
 * Servicegraph UI [https://istio.io/docs/tasks/telemetry/servicegraph/](https://istio.io/docs/tasks/telemetry/servicegraph/)
 
-```bash
+```shell
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}') 8088:8088 &
 ```
 
@@ -878,13 +940,15 @@ Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/
 
 * Kibana UI
 
-```bash
+```shell
 kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
 ```
 
+Link: [https://localhost:5601](https://localhost:5601)
+
 * Cerbero
 
-```bash
+```shell
 kubectl -n logging port-forward $(kubectl -n logging get pod -l role=cerebro -o jsonpath='{.items[0].metadata.name}') 9000:9000 &
 ```
 
@@ -892,7 +956,7 @@ Link: [http://localhost:9000](http://localhost:9000)
 
 * Ceph Dashboard
 
-```bash
+```shell
 kubectl -n rook-ceph port-forward $(kubectl -n rook-ceph get pod -l app=rook-ceph-mgr -o jsonpath='{.items[0].metadata.name}') 8443:8443 &
 ```
 
