@@ -26,6 +26,7 @@ NODE_IP[2]=`terraform output -json | jq -r '.vms_public_ip.value[2]'`
 
 echo "# Fill the /etc/hosts on each cluster node"
 for NODE in ${NODE_IP[*]}; do
+  echo "# ${NODE}"
   ssh -t ${MYUSER}@$NODE ${SSH_ARGS} "sudo /bin/bash -c '
     sed -i \"s/^#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/\" /etc/sysctl.d/99-sysctl.conf
     sysctl --quiet --system
@@ -34,10 +35,10 @@ ${NODE_IP[0]} node1 node1.cluster.local
 ${NODE_IP[1]} node2 node2.cluster.local
 ${NODE_IP[2]} node3 node3.cluster.local
 EOF2
-'"
+'" && echo "# Done..."
 done
 
-echo "# Install kubernetes Master"
+echo "# Install kubernetes Master (${MYUSER}@${NODE_IP[0]})"
 ssh -t ${MYUSER}@${NODE_IP[0]} ${SSH_ARGS} "sudo /bin/bash -cx '
 $INSTALL_KUBERNETES
 
@@ -56,6 +57,7 @@ echo "# Create bootstrap token command using: ssh ${MYUSER}@${NODE_IP[0]} \"sudo
 KUBEADM_TOKEN_COMMAND=`ssh -t ${MYUSER}@${NODE_IP[0]} ${SSH_ARGS} "sudo kubeadm token create --print-join-command"`
 
 echo "# Install Kubernetes packages to all nodes and join the nodes to the master using bootstrap token"
+test -f nohup.out && rm nohup.out
 for NODE in ${NODE_IP[1]} ${NODE_IP[2]}; do
   echo "*** $NODE"
   nohup ssh -t ${MYUSER}@$NODE ${SSH_ARGS} "sudo /bin/bash -cx '
@@ -66,7 +68,7 @@ $KUBEADM_TOKEN_COMMAND
 done
 
 echo "# Copy the kubeconfig to the local machine and get some basic details about kuberenetes cluster"
-ssh ${SSH_ARGS} ${MYUSER}@${NODE_IP[0]} "cat ~/.kube/config" | sed "s/192.168.250.11/${NODE_IP[0]}/" > kubeconfig.conf
+ssh ${SSH_ARGS} ${MYUSER}@${NODE_IP[0]} "cat ~/.kube/config" | sed "s@    server: https://.*@    server: https://${NODE_IP[0]}:6443@" > kubeconfig.conf
 
 export KUBECONFIG=$PWD/kubeconfig.conf
 kubectl get nodes
