@@ -652,6 +652,28 @@ Configure port forwarding for Kibana
 kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
 ```
 
+## Istio Architecture
+
+Few notes about Istio architecture.
+
+![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg)
+
+* [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy) - is a high-performance proxy to mediate all inbound and outbound traffic for all services in the service mesh.
+* [Mixer](https://istio.io/docs/concepts/what-is-istio/#mixer) - enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services.
+* [Pilot](https://istio.io/docs/concepts/what-is-istio/#pilot) - provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing.
+* [Citadel](https://istio.io/docs/concepts/what-is-istio/#citadel) - provides strong service-to-service and end-user authentication with built-in identity and credential management.
+
+![Traffic Management with Istio](https://istio.io/docs/concepts/traffic-management/TrafficManagementOverview.svg)
+
+![Istio Security Architecture](https://istio.io/docs/concepts/security/architecture.svg)
+
+### Istio types
+
+* [VirtualService](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#VirtualService) defines the rules that control how requests for a service are routed within an Istio service mesh.
+* [DestinationRule](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#DestinationRule) configures the set of policies to be applied to a request after VirtualService routing has occurred.
+* [ServiceEntry](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#ServiceEntry) is commonly used to enable requests to services outside of an Istio service mesh.
+* [Gateway](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#Gateway) configures a load balancer for HTTP/TCP traffic, most commonly operating at the edge of the mesh to enable ingress traffic for an application.
+
 ## Install Istio
 
 Either download Istio directly from [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases) or get the latest version by using curl.
@@ -751,21 +773,6 @@ kubectl apply -f ../../yaml/fluentd-istio.yaml
 ## Istio example
 
 Let's see how Istio can be used and how it looks.
-
-### Architecture
-
-Short notes about Istio architecture.
-
-![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg)
-
-* Envoy - is a high-performance proxy to mediate all inbound and outbound traffic for all services in the service mesh.
-* Mixer - enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services.
-* Pilot - provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing.
-* Citadel - provides strong service-to-service and end-user authentication with built-in identity and credential management.
-
-![Traffic Management with Istio](https://istio.io/docs/concepts/traffic-management/TrafficManagementOverview.svg)
-
-![Istio Security Architecture](https://istio.io/docs/concepts/security/architecture.svg)
 
 Let the default namespace to use istio injection.
 
