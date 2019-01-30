@@ -18,12 +18,11 @@ env:
     - ISTIO_VERSION="1.0.5"
 
 install:
-  - gem install awesome_bot
   - TERRAFORM_LATEST_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')
   - curl --silent --location https://releases.hashicorp.com/terraform/${TERRAFORM_LATEST_VERSION}/terraform_${TERRAFORM_LATEST_VERSION}_linux_amd64.zip --output /tmp/terraform_linux_amd64.zip
   - sudo unzip -o /tmp/terraform_linux_amd64.zip -d /usr/local/bin/
   - curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
-  - npm install -g markdownlint-cli
+  - npm install -g markdownlint-cli markdown-link-check
 
 before_script:
   # Generate ssh key if needed
@@ -54,11 +53,13 @@ script:
     EOF
     terraform init     -var-file=terraform.tfvars terrafrom/openstack
     terraform validate -var-file=terraform.tfvars terrafrom/openstack
-  # Link Checks
-  - awesome_bot --white-list "elasticsearch-client,localhost,ic-us.ssl.mirantis.net,charts.rook.io,raw.githubusercontent.com/upmc-enterprises/elasticsearch-operator/master/charts" --allow-dupe --allow-redirect --skip-save-results `find . -name "*.md"`
   # Markdown check
   - |
     echo '"line-length": false' > markdownlint_config.json
     markdownlint -c markdownlint_config.json README.md
+  # Link Checks
+  - |
+    echo '{ "ignorePatterns": [ { "pattern": "^(http|https)://localhost" } ] }' > config.json
+    markdown-link-check --config config.json ./README.md
   # k8s commands
   - sed -n '/^```bash/,/^```/p' README.md | sed '/^```*/d' | sed -n '/^kubectl get nodes -o wide/,$p' | sed '/^helm repo add rook-stable/,/kubectl get -l app=fluent-bit svc,pods --all-namespaces -o wide/d' | sh -eux
