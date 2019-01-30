@@ -1171,6 +1171,8 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-reviews-test-v2.ya
 
 ### Injecting an HTTP abort fault
 
+[https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault](https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault)
+
 Let's ntroduce an HTTP abort to the ratings microservices for the test user `jason`.
 
 Apply application version routing
@@ -1232,6 +1234,75 @@ Cleanup
 ```bash
 kubectl delete -f samples/bookinfo/networking/virtual-service-ratings-test-abort.yaml
 kubectl delete -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+```
+
+### Weight-based routing
+
+[https://istio.io/docs/tasks/traffic-management/traffic-shifting/#apply-weight-based-routing](https://istio.io/docs/tasks/traffic-management/traffic-shifting/#apply-weight-based-routing)
+
+Route a percentage of traffic to one service or another - send **%50** of traffic to `reviews:v1` and **%50** to `reviews:v3` and finally complete the migration by sending %100 of traffic to `reviews:v3`.
+
+Route all traffic to the `reviews:v1` version of each microservice:
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
+
+Transfer 50% of the traffic from `reviews:v1` to `reviews:v3`:
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-50-v3.yaml
+```
+
+Confirm the rule was replaced:
+
+```bash
+kubectl get virtualservice reviews -o yaml
+```
+
+Output:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+  ...
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+      weight: 50
+    - destination:
+        host: reviews
+        subset: v3
+      weight: 50
+```
+
+Test:
+
+* Refresh the `/productpage` in your browser and you now see **red** colored star ratings approximately **50%** of the time.
+
+Assuming you decide that the reviews:v3 microservice is stable, you can route 100% of the traffic to reviews:v3 by applying this virtual service
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
+```
+
+Test:
+
+* When you refresh the `/productpage` you will always see book reviews with **red** colored star ratings for **each** review.
+
+Cleanup
+
+* Remove the application routing rules:
+
+```bash
+kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
 ## List of GUIs
