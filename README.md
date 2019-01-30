@@ -1042,6 +1042,8 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
 ### Route based on user identity
 
+[https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity](https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity)
+
 All traffic from a user named `jason` will be routed to the service `reviews:v2` by forwarding HTTP requests with custom end-user header to the appropriate reviews service.
 
 Enable user-based routing:
@@ -1092,7 +1094,144 @@ Cleanup
 * Remove the application virtual services:
 
 ```bash
-kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+kubectl delete -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+```
+
+### Injecting an HTTP delay fault
+
+[https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-delay-fault](https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-delay-fault)
+
+Apply application version routing
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+```
+
+Inject a 7s delay between the `reviews:v2` and ratings microservices for user `jason`:
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-ratings-test-delay.yaml
+```
+
+Confirm the rule was created:
+
+```bash
+kubectl get virtualservice ratings -o yaml
+```
+
+Output:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+  ...
+spec:
+  hosts:
+  - ratings
+  http:
+  - fault:
+      delay:
+        fixedDelay: 7s
+        percent: 100
+    match:
+    - headers:
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+  - route:
+    - destination:
+        host: ratings
+        subset: v1
+```
+
+Tests
+
+* On the `/productpage`, log in as user `jason` adn you should see:
+
+```text
+Error fetching product reviews!
+Sorry, product reviews are currently unavailable for this book.
+```
+
+* Open the Developer Tools menu (F12) -> Network tab - webpage actually loads in about 6 seconds.
+
+Cleanup
+
+* Remove the application virtual services:
+
+```bash
+kubectl delete -f samples/bookinfo/networking/virtual-service-ratings-test-delay.yaml
+kubectl delete -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+```
+
+### Injecting an HTTP abort fault
+
+Let's ntroduce an HTTP abort to the ratings microservices for the test user `jason`.
+
+Apply application version routing
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+```
+
+Create a fault injection rule to send an HTTP abort for user `jason`:
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-ratings-test-abort.yaml
+```
+
+Confirm the rule was created
+
+```bash
+kubectl get virtualservice ratings -o yaml
+```
+
+Output:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+  ...
+spec:
+  hosts:
+  - ratings
+  http:
+  - fault:
+      abort:
+        httpStatus: 500
+        percent: 100
+    match:
+    - headers:
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+  - route:
+    - destination:
+        host: ratings
+        subset: v1
+```
+
+Testing
+
+* On the `/productpage`, log in as user `jason` - the page loads immediately and the product ratings not available message appears.
+
+Cleanup
+
+* Remove the application virtual services:
+
+```bash
+kubectl delete -f samples/bookinfo/networking/virtual-service-ratings-test-abort.yaml
+kubectl delete -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
 ```
 
 ## List of GUIs
