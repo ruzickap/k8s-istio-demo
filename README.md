@@ -75,7 +75,7 @@ vms_public_ip = [
 ]
 ```
 
-At the end of the output you should see 3 IP addresses which should be accessible by ssh using your public key (~/.ssh/id_rsa.pub).
+At the end of the output you should see 3 IP addresses which should be accessible by ssh using your public key (`~/.ssh/id_rsa.pub`).
 
 ## Install k8s
 
@@ -163,7 +163,6 @@ Install Rook Operator (Ceph storage for k8s).
 ```bash
 helm repo add rook-stable https://charts.rook.io/stable
 helm install --wait --name rook-ceph --namespace rook-ceph-system rook-stable/rook-ceph
-sleep 5
 ```
 
 See how the rook-ceph-system should look like:
@@ -772,7 +771,9 @@ kubectl apply -f ../../yaml/fluentd-istio.yaml
 
 ## Istio example
 
-Let's see how Istio can be used and how it looks.
+Check how Istio can be used and how it works...
+
+### Check + Enable Istio in default namespace
 
 Let the default namespace to use istio injection.
 
@@ -819,59 +820,92 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=ki
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}') 8088:8088 &
 ```
 
+### Deploy application into the default namespace where Istio is enabled
+
+The Bookinfo application is broken into four separate microservices:
+
+* productpage - the productpage microservice calls the details and reviews microservices to populate the page.
+* details - the details microservice contains book information.
+* reviews - the reviews microservice contains book reviews. It also calls the ratings microservice.
+* ratings - the ratings microservice contains book ranking information that accompanies a book review.
+
+There are 3 versions of the `reviews` microservice:
+
+* Version v1 - doesn’t call the **ratings service**.
+* Version v2 - calls the ratings service, and displays each rating as 1 to 5 **black stars**.
+* Version v3 - calls the ratings service, and displays each rating as 1 to 5 **red stars**.
+
+[Bookinfo](https://istio.io/docs/examples/bookinfo/) application architecture
+
+![Application Architecture without Istio](https://istio.io/docs/examples/bookinfo/noistio.svg)
+
+![Application Architecture with Istio](https://istio.io/docs/examples/bookinfo/withistio.svg)
+
 Deploy the demo application [https://istio.io/docs/examples/bookinfo/](https://istio.io/docs/examples/bookinfo/)
 
 ```bash
 kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
+sleep 200
 ```
 
-Define the ingress gateway for the application
+Confirm all services and pods are correctly defined and running:
 
 ```bash
-kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
-sleep 150
-```
-
-Check the deployed application
-
-```bash
-kubectl get svc,deployment,pods,gateway,virtualservice -o wide
+kubectl get svc,deployment,pods -o wide
 ```
 
 Output:
 
 ```shell
 NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE       SELECTOR
-service/details       ClusterIP   10.107.118.4     <none>        9080/TCP   5m        app=details
-service/kubernetes    ClusterIP   10.96.0.1        <none>        443/TCP    46m       <none>
-service/productpage   ClusterIP   10.109.95.3      <none>        9080/TCP   5m        app=productpage
-service/ratings       ClusterIP   10.100.134.207   <none>        9080/TCP   5m        app=ratings
-service/reviews       ClusterIP   10.97.112.16     <none>        9080/TCP   5m        app=reviews
+service/details       ClusterIP   10.97.156.143    <none>        9080/TCP   4m        app=details
+service/kubernetes    ClusterIP   10.96.0.1        <none>        443/TCP    58m       <none>
+service/productpage   ClusterIP   10.111.118.194   <none>        9080/TCP   3m        app=productpage
+service/ratings       ClusterIP   10.104.20.168    <none>        9080/TCP   3m        app=ratings
+service/reviews       ClusterIP   10.97.181.246    <none>        9080/TCP   3m        app=reviews
 
 NAME                                   DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS    IMAGES                                         SELECTOR
-deployment.extensions/details-v1       1         1         1            1           5m        details       istio/examples-bookinfo-details-v1:1.8.0       app=details,version=v1
-deployment.extensions/productpage-v1   1         1         1            1           5m        productpage   istio/examples-bookinfo-productpage-v1:1.8.0   app=productpage,version=v1
-deployment.extensions/ratings-v1       1         1         1            1           5m        ratings       istio/examples-bookinfo-ratings-v1:1.8.0       app=ratings,version=v1
-deployment.extensions/reviews-v1       1         1         1            1           5m        reviews       istio/examples-bookinfo-reviews-v1:1.8.0       app=reviews,version=v1
-deployment.extensions/reviews-v2       1         1         1            1           5m        reviews       istio/examples-bookinfo-reviews-v2:1.8.0       app=reviews,version=v2
-deployment.extensions/reviews-v3       1         1         1            1           5m        reviews       istio/examples-bookinfo-reviews-v3:1.8.0       app=reviews,version=v3
+deployment.extensions/details-v1       1         1         1            1           3m        details       istio/examples-bookinfo-details-v1:1.8.0       app=details,version=v1
+deployment.extensions/productpage-v1   1         1         1            1           3m        productpage   istio/examples-bookinfo-productpage-v1:1.8.0   app=productpage,version=v1
+deployment.extensions/ratings-v1       1         1         1            1           3m        ratings       istio/examples-bookinfo-ratings-v1:1.8.0       app=ratings,version=v1
+deployment.extensions/reviews-v1       1         1         1            1           3m        reviews       istio/examples-bookinfo-reviews-v1:1.8.0       app=reviews,version=v1
+deployment.extensions/reviews-v2       1         1         1            1           3m        reviews       istio/examples-bookinfo-reviews-v2:1.8.0       app=reviews,version=v2
+deployment.extensions/reviews-v3       1         1         1            1           3m        reviews       istio/examples-bookinfo-reviews-v3:1.8.0       app=reviews,version=v3
 
 NAME                                      READY     STATUS    RESTARTS   AGE       IP            NODE
-pod/details-v1-68c7c8666d-td6b7           2/2       Running   0          5m        10.244.1.25   pruzicka-k8s-istio-demo-node02
-pod/elasticsearch-operator-sysctl-86zdw   1/1       Running   0          28m       10.244.1.9    pruzicka-k8s-istio-demo-node02
-pod/elasticsearch-operator-sysctl-rmhg4   1/1       Running   0          28m       10.244.0.8    pruzicka-k8s-istio-demo-node01
-pod/elasticsearch-operator-sysctl-rptxf   1/1       Running   0          28m       10.244.2.9    pruzicka-k8s-istio-demo-node03
-pod/productpage-v1-54d799c966-hghsz       2/2       Running   0          5m        10.244.1.27   pruzicka-k8s-istio-demo-node02
-pod/ratings-v1-8558d4458d-vfrh4           2/2       Running   0          5m        10.244.2.19   pruzicka-k8s-istio-demo-node03
-pod/reviews-v1-cb8655c75-68shr            2/2       Running   0          5m        10.244.1.26   pruzicka-k8s-istio-demo-node02
-pod/reviews-v2-7fc9bb6dcf-6d252           2/2       Running   0          5m        10.244.0.13   pruzicka-k8s-istio-demo-node01
-pod/reviews-v3-c995979bc-vrnbg            2/2       Running   0          5m        10.244.2.20   pruzicka-k8s-istio-demo-node03
+pod/details-v1-68c7c8666d-hwggx           2/2       Running   0          3m        10.244.2.40   pruzicka-k8s-istio-demo-node02
+pod/elasticsearch-operator-sysctl-h5xds   1/1       Running   0          42m       10.244.2.10   pruzicka-k8s-istio-demo-node02
+pod/elasticsearch-operator-sysctl-kx4pg   1/1       Running   0          42m       10.244.0.7    pruzicka-k8s-istio-demo-node01
+pod/elasticsearch-operator-sysctl-pqbsz   1/1       Running   0          42m       10.244.1.9    pruzicka-k8s-istio-demo-node03
+pod/productpage-v1-54d799c966-f75rv       2/2       Running   0          3m        10.244.1.22   pruzicka-k8s-istio-demo-node03
+pod/ratings-v1-8558d4458d-l77gz           2/2       Running   0          3m        10.244.2.41   pruzicka-k8s-istio-demo-node02
+pod/reviews-v1-cb8655c75-md9mg            2/2       Running   0          3m        10.244.1.21   pruzicka-k8s-istio-demo-node03
+pod/reviews-v2-7fc9bb6dcf-qp4vs           2/2       Running   0          3m        10.244.0.12   pruzicka-k8s-istio-demo-node01
+pod/reviews-v3-c995979bc-zf2kg            2/2       Running   0          3m        10.244.2.42   pruzicka-k8s-istio-demo-node02
+```
 
+Define the ingress gateway for the application
+
+```bash
+cat samples/bookinfo/networking/bookinfo-gateway.yaml
+kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
+sleep 5
+```
+
+Confirm the gateway has been created
+
+```bash
+kubectl get gateway,virtualservice
+```
+
+Output:
+
+```shell
 NAME                                           AGE
-gateway.networking.istio.io/bookinfo-gateway   5m
+gateway.networking.istio.io/bookinfo-gateway   8s
 
 NAME                                          AGE
-virtualservice.networking.istio.io/bookinfo   5m
+virtualservice.networking.istio.io/bookinfo   7s
 ```
 
 Determining the ingress IP and ports when using a node port
@@ -888,7 +922,7 @@ echo "$INGRESS_PORT | $SECURE_INGRESS_PORT | $INGRESS_HOST | $GATEWAY_URL"
 Output:
 
 ```shell
-31380 | 31390 | 172.16.240.185 | 172.16.240.185:31380
+31380 | 31390 | 172.16.241.103 | 172.16.241.103:31380
 ```
 
 Confirm the app is running
@@ -902,6 +936,99 @@ Output:
 ```shell
 200
 ```
+
+Create default destination rules (subsets) for the Bookinfo services:
+
+```bash
+kubectl apply -f samples/bookinfo/networking/destination-rule-all.yaml
+```
+
+Display the destination rules:
+
+```bash
+kubectl get destinationrules -o yaml
+```
+
+### Configuring Request Routing
+
+[https://istio.io/docs/tasks/traffic-management/request-routing/](https://istio.io/docs/tasks/traffic-management/request-routing/)
+
+Apply the virtual services which will route all traffic to **v1** of each microservice:
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
+
+Display the defined routes
+
+```bash
+kubectl get virtualservices -o yaml
+```
+
+Output:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: details
+  ...
+spec:
+  hosts:
+  - details
+  http:
+  - route:
+    - destination:
+        host: details
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: productpage
+  ...
+spec:
+  gateways:
+  - bookinfo-gateway
+  - mesh
+  hosts:
+  - productpage
+  http:
+  - route:
+    - destination:
+        host: productpage
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+  ...
+spec:
+  hosts:
+  - ratings
+  http:
+  - route:
+    - destination:
+        host: ratings
+        subset: v1
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+  ...
+spec:
+  hosts:
+  - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+```
+
+Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and notice that the reviews part of the page displays with no rating stars, no matter how many times you refresh.
 
 ## List of GUIs
 
