@@ -1028,7 +1028,72 @@ spec:
         subset: v1
 ```
 
-Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and notice that the reviews part of the page displays with no rating stars, no matter how many times you refresh.
+Test
+
+* Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and notice that the reviews part of the page displays with no rating stars, no matter how many times you refresh.
+
+Cleanup
+
+* Remove the application virtual services:
+
+```bash
+kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
+
+### Route based on user identity
+
+All traffic from a user named `jason` will be routed to the service `reviews:v2` by forwarding HTTP requests with custom end-user header to the appropriate reviews service.
+
+Enable user-based routing:
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+```
+
+Confirm the rule is created:
+
+```bash
+kubectl get virtualservice reviews -o yaml
+```
+
+Output:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+  ...
+spec:
+  hosts:
+  - reviews
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: reviews
+        subset: v2
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+```
+
+Test
+
+* On the /productpage of the Bookinfo app, log in as user `jason` and refresh the browser.
+* Log in as another user (pick any name you wish) and refresh the browser
+
+Cleanup
+
+* Remove the application virtual services:
+
+```bash
+kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
 
 ## List of GUIs
 
