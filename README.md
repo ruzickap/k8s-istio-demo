@@ -2,12 +2,15 @@
 
 [![Build Status](https://travis-ci.com/ruzickap/k8s-istio-demo.svg?branch=master)](https://travis-ci.com/ruzickap/k8s-istio-demo)
 
+[https://ruzickap.gitbook.io/k8s-istio-demo/](https://ruzickap.gitbook.io/k8s-istio-demo/)
+
 Find below few commands showing basics of Istio...
 
 ## Requirements
 
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (kubernetes-client package)
 * [Helm](https://helm.sh/)
+* [Siege](https://github.com/JoeDog/siege) (siege package)
 * [Terraform](https://www.terraform.io/)
 
 ## Provision VMs in OpenStack
@@ -263,7 +266,7 @@ kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/exa
 sleep 20
 ```
 
-Set `rook-ceph-block`
+Set `rook-ceph-block` as default storageclass.
 
 ```bash
 kubectl patch storageclass rook-ceph-block -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
@@ -529,7 +532,7 @@ Install ElasticSearch operator.
 
 ```bash
 helm install --wait --name elasticsearch-operator es-operator/elasticsearch-operator --set rbac.enabled=True --namespace es-operator
-sleep 20
+sleep 30
 ```
 
 Check how the operator looks like.
@@ -626,6 +629,19 @@ helm install --wait stable/fluent-bit --name=fluent-bit --namespace=logging \
   --set backend.es.tls_verify=off
 ```
 
+Configure port forwarding for Kibana
+
+```bash
+# Kibana UI - https://localhost:5601
+kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+```
+
+Configure ElasticSearch:
+
+* Navigate to the [Kibana UI](https://localhost:5601) and click the "Set up index patterns" in the top right.
+* Use * as the index pattern, and click "Next step.".
+* Select @timestamp as the Time Filter field name, and click "Create index pattern."
+
 Check fluent-bit installation:
 
 ```bash
@@ -642,13 +658,6 @@ NAMESPACE   NAME                              READY     STATUS    RESTARTS   AGE
 logging     pod/fluent-bit-fluent-bit-dcg4s   1/1       Running   0          7h        10.244.1.15   pruzicka-k8s-istio-demo-node03
 logging     pod/fluent-bit-fluent-bit-tfqdb   1/1       Running   0          7h        10.244.0.11   pruzicka-k8s-istio-demo-node01
 logging     pod/fluent-bit-fluent-bit-tnxj2   1/1       Running   0          7h        10.244.2.13   pruzicka-k8s-istio-demo-node02
-```
-
-Configure port forwarding for Kibana
-
-```bash
-# Kibana UI - https://localhost:5601
-kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
 ```
 
 ## Istio Architecture
@@ -697,6 +706,8 @@ helm install --wait --name istio --namespace istio-system install/kubernetes/hel
   --set gateways.istio-egressgateway.type=NodePort \
   --set grafana.enabled=true \
   --set kiali.enabled=true \
+  --set kiali.dashboard.grafanaURL=http://localhost:3000 \
+  --set kiali.dashboard.jaegerURL=http://localhost:16686 \
   --set servicegraph.enabled=true \
   --set telemetry-gateway.grafanaEnabled=true \
   --set telemetry-gateway.prometheusEnabled=true \
@@ -884,6 +895,13 @@ pod/reviews-v2-7fc9bb6dcf-qp4vs           2/2       Running   0          3m     
 pod/reviews-v3-c995979bc-zf2kg            2/2       Running   0          3m        10.244.2.42   pruzicka-k8s-istio-demo-node02
 ```
 
+Check the container details - you should see also container `istio-proxy` next to `productpage`
+
+```bash
+kubectl describe pod -l app=productpage
+kubectl logs $(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}') istio-proxy
+```
+
 Define the ingress gateway for the application
 
 ```bash
@@ -928,7 +946,7 @@ Output:
 Confirm the app is running
 
 ```bash
-curl -o /dev/null -s -w "%{http_code}\n" http://${GATEWAY_URL}/productpage
+curl -o /dev/null -s -w "%{http_code}\n" -A "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5" http://${GATEWAY_URL}/productpage
 ```
 
 Output:
@@ -948,6 +966,21 @@ Display the destination rules:
 ```bash
 kubectl get destinationrules -o yaml
 ```
+
+Open the browser with these pages:
+
+* [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html)
+* [http://localhost:20001](http://localhost:20001) (Graph)
+* [http://localhost:16686](http://localhost:16686)
+* [http://localhost:3000](http://localhost:3000) (Grafana -> Home -> Istio -> Istio Performance Dashboard, Istio Service Dashboard, Istio Workload Dashboard )
+
+Generate some traffic for next 5 minutes...
+
+```bash
+siege --concurrent=1 -q --internet --time=5M $GATEWAY_URL/productpage &
+```
+
+![Istio Graph](images/istio_kiali_graph.gif "Istio Graph")
 
 ### Configuring Request Routing
 
@@ -1032,14 +1065,6 @@ Test
 
 * Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and notice that the reviews part of the page displays with no rating stars, no matter how many times you refresh.
 
-Cleanup
-
-* Remove the application virtual services:
-
-```bash
-kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
-```
-
 ### Route based on user identity
 
 [https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity](https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity)
@@ -1089,23 +1114,9 @@ Test
 * On the /productpage of the Bookinfo app, log in as user `jason` and refresh the browser.
 * Log in as another user (pick any name you wish) and refresh the browser
 
-Cleanup
-
-* Remove the application virtual services:
-
-```bash
-kubectl delete -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
-```
-
 ### Injecting an HTTP delay fault
 
 [https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-delay-fault](https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-delay-fault)
-
-Apply application version routing
-
-```bash
-kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
-```
 
 Inject a 7s delay between the `reviews:v2` and ratings microservices for user `jason`:
 
@@ -1149,8 +1160,6 @@ spec:
         subset: v1
 ```
 
-Tests
-
 * On the `/productpage`, log in as user `jason` adn you should see:
 
 ```text
@@ -1160,26 +1169,13 @@ Sorry, product reviews are currently unavailable for this book.
 
 * Open the Developer Tools menu (F12) -> Network tab - webpage actually loads in about 6 seconds.
 
-Cleanup
-
-* Remove the application virtual services:
-
-```bash
-kubectl delete -f samples/bookinfo/networking/virtual-service-ratings-test-delay.yaml
-kubectl delete -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
-```
+* Open Jaeger UI [http://localhost:16686](http://localhost:16686) and check the length of the query
 
 ### Injecting an HTTP abort fault
 
 [https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault](https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault)
 
 Let's ntroduce an HTTP abort to the ratings microservices for the test user `jason`.
-
-Apply application version routing
-
-```bash
-kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
-```
 
 Create a fault injection rule to send an HTTP abort for user `jason`:
 
@@ -1227,13 +1223,12 @@ Testing
 
 * On the `/productpage`, log in as user `jason` - the page loads immediately and the product ratings not available message appears.
 
-Cleanup
+![Injecting an HTTP abort fault Kiali Graph](images/istio_kiali_injecting_an_http_abort_fault.gif "Injecting an HTTP abort fault Kiali Graph")
 
-* Remove the application virtual services:
+* Remove the application routing rules:
 
 ```bash
-kubectl delete -f samples/bookinfo/networking/virtual-service-ratings-test-abort.yaml
-kubectl delete -f samples/bookinfo/networking/virtual-service-reviews-test-v2.yaml
+kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
 ### Weight-based routing
@@ -1283,21 +1278,73 @@ spec:
       weight: 50
 ```
 
-Test:
-
 * Refresh the `/productpage` in your browser and you now see **red** colored star ratings approximately **50%** of the time.
 
-Assuming you decide that the reviews:v3 microservice is stable, you can route 100% of the traffic to reviews:v3 by applying this virtual service
+![Weight-based routing Kiali Graph](images/istio_kiali_weight-based_routing.gif "Weight-based routing Kiali Graph")
+
+Assuming you decide that the `reviews:v3` microservice is stable, you can route **100%** of the traffic to `reviews:v3` by applying this virtual service.
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
 ```
 
-Test:
-
 * When you refresh the `/productpage` you will always see book reviews with **red** colored star ratings for **each** review.
 
-Cleanup
+* Remove the application routing rules:
+
+```bash
+kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
+
+### Mirroring
+
+[https://istio.io/docs/tasks/traffic-management/mirroring/](https://istio.io/docs/tasks/traffic-management/mirroring/)
+
+Mirroring sends a copy of live traffic to a mirrored service.
+
+First all traffic will go to `reviews:v1`, then the rule will be applied to mirror a portion of traffic to `reviews:v2`.
+
+Apply the virtual services which will route all traffic to **v1** of each microservice:
+
+```bash
+kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
+
+Change the route rule to mirror traffic to v2:
+
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+    - reviews
+  http:
+  - route:
+    - destination:
+        host: reviews
+        subset: v1
+      weight: 100
+    mirror:
+      host: reviews
+      subset: v2
+EOF
+```
+
+Check the logs on both pods `reviews:v1` and `reviews:v2`:
+
+```bash
+kubectl logs $(kubectl get pod -l app=reviews,version=v1 -o jsonpath='{.items[0].metadata.name}') istio-proxy
+kubectl logs $(kubectl get pod -l app=reviews,version=v2 -o jsonpath='{.items[0].metadata.name}') istio-proxy
+```
+
+Do a simple query:
+
+```bash
+curl -o /dev/null -s -w "%{http_code}\n" http://${GATEWAY_URL}/productpage
+```
 
 * Remove the application routing rules:
 
@@ -1337,6 +1384,8 @@ Link: [http://localhost:3000/dashboard/db/istio-mesh-dashboard](http://localhost
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001 &
 ```
 
+Login: admin
+Password: admin
 Link: [http://localhost:20001](http://localhost:20001) (admin/admin)
 
 * Servicegraph UI [https://istio.io/docs/tasks/telemetry/servicegraph/](https://istio.io/docs/tasks/telemetry/servicegraph/)
@@ -1376,8 +1425,6 @@ Link: [https://localhost:8443/ceph-dashboard](https://localhost:8443/ceph-dashbo
 ## Handy links
 
 * [https://www.youtube.com/watch?v=sh0F7FMFVSI](https://www.youtube.com/watch?v=sh0F7FMFVSI)
-
-* [https://www.youtube.com/watch?v=yxmBpHjCB3k](https://www.youtube.com/watch?v=yxmBpHjCB3k)
 
 * [https://www.youtube.com/watch?v=RVScqW8_liw](https://www.youtube.com/watch?v=RVScqW8_liw)
 
