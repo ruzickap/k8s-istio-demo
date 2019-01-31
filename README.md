@@ -1064,6 +1064,8 @@ spec:
 
 * Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and notice that the reviews part of the page displays with no rating stars, no matter how many times you refresh.
 
+![Bookinfo v1](images/bookinfo_v1.jpg "Bookinfo v1")
+
 ### Route based on user identity
 
 [https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity](https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity)
@@ -1111,6 +1113,8 @@ spec:
 * On the /productpage of the Bookinfo app, log in as user `jason` and refresh the browser.
 
 * Log in as another user (pick any name you wish) and refresh the browser
+
+![Bookinfo v2](images/bookinfo_v2.jpg "Bookinfo v2")
 
 You can do the same with user-agent header for example:
 
@@ -1297,6 +1301,8 @@ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
 ```
 
 * When you refresh the `/productpage` you will always see book reviews with **red** colored star ratings for **each** review.
+
+![Bookinfo v3](images/bookinfo_v3.jpg "Bookinfo v3")
 
 * Remove the application routing rules:
 
