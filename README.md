@@ -1,4 +1,4 @@
-# Kubernetes with Istio running on top of OpenStack demo
+# Kubernetes with Istio demo
 
 [![Build Status](https://travis-ci.com/ruzickap/k8s-istio-demo.svg?branch=master)](https://travis-ci.com/ruzickap/k8s-istio-demo)
 
@@ -17,20 +17,20 @@ Find below few commands showing basics of Istio...
 
 Start 3 VMs (one master and 2 workers) where the k8s will be installed.
 
-Generate ssh keys if not exists.
+Generate ssh keys if not exists:
 
 ```bash
 test -f $HOME/.ssh/id_rsa || ( install -m 0700 -d $HOME/.ssh && ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N "" )
 ```
 
-Clone this repo.
+Clone this repo:
 
 ```bash
 git clone https://github.com/ruzickap/k8s-istio-demo
 cd k8s-istio-demo
 ```
 
-Modify the terraform variable file if needed.
+Modify the terraform variable file if needed:
 
 ```bash
 cat > terrafrom/openstack/terraform.tfvars << EOF
@@ -45,19 +45,19 @@ openstack_user_domain_name                         = "ldap_mirantis"
 EOF
 ```
 
-Download terraform components.
+Download terraform components:
 
 ```bash
 terraform init -var-file=terrafrom/openstack/terraform.tfvars terrafrom/openstack
 ```
 
-Create VMs in OpenStack.
+Create VMs in OpenStack:
 
 ```bash
 terraform apply -auto-approve -var-file=terrafrom/openstack/terraform.tfvars terrafrom/openstack
 ```
 
-Show terraform output.
+Show terraform output:
 
 ```bash
 terraform output
@@ -82,13 +82,13 @@ At the end of the output you should see 3 IP addresses which should be accessibl
 
 ## Install k8s
 
-Install k8s using kubeadm to the provisioned VMs.
+Install k8s using kubeadm to the provisioned VMs:
 
 ```bash
 ./install-k8s-kubeadm.sh
 ```
 
-Check if all nodes are up.
+Check if all nodes are up:
 
 ```bash
 export KUBECONFIG=$PWD/kubeconfig.conf
@@ -104,7 +104,7 @@ pruzicka-k8s-istio-demo-node02   Ready     <none>    1m        v1.13.2   <none> 
 pruzicka-k8s-istio-demo-node03   Ready     <none>    1m        v1.13.2   <none>        Ubuntu 18.04.1 LTS   4.15.0-43-generic   docker://18.6.1
 ```
 
-View services, deployments, and pods.
+View services, deployments, and pods:
 
 ``` bash
 kubectl get svc,deploy,po --all-namespaces -o wide
@@ -137,7 +137,7 @@ kube-system   pod/kube-scheduler-pruzicka-k8s-istio-demo-node01            1/1  
 
 ## Install Helm
 
-Install Tiller (the Helm server-side component) into the Kubernetes Cluster.
+Install Tiller (the Helm server-side component) into the Kubernetes Cluster:
 
 ```bash
 kubectl create serviceaccount tiller --namespace kube-system
@@ -146,7 +146,7 @@ helm init --wait --service-account tiller
 helm repo update
 ```
 
-Check if the tiller was installed properly
+Check if the tiller was installed properly:
 
 ```bash
 kubectl get pods -l app=helm --all-namespaces
@@ -161,7 +161,7 @@ kube-system   tiller-deploy-dbb85cb99-hhxrt   1/1       Running   0          35s
 
 ## Instal Rook
 
-Install Rook Operator (Ceph storage for k8s).
+Install Rook Operator (Ceph storage for k8s):
 
 ```bash
 helm repo add rook-stable https://charts.rook.io/stable
@@ -190,14 +190,14 @@ pod/rook-discover-mhbgb                   1/1       Running   0          1m     
 pod/rook-discover-ndblh                   1/1       Running   0          1m        10.244.1.3       pruzicka-k8s-istio-demo-node02
 ```
 
-Create your Rook cluster.
+Create your Rook cluster:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml
 sleep 200
 ```
 
-Check what was created in `rook-ceph` namespace.
+Check what was created in `rook-ceph` namespace:
 
 ```bash
 kubectl get svc,deploy,po --namespace=rook-ceph -o wide
@@ -235,14 +235,14 @@ pod/rook-ceph-osd-prepare-pruzicka-k8s-istio-demo-node02-65mnz   0/2       Compl
 pod/rook-ceph-osd-prepare-pruzicka-k8s-istio-demo-node03-kz857   0/2       Completed   0          49s       10.244.2.6   pruzicka-k8s-istio-demo-node03
 ```
 
-Get the Toolbox with ceph commands.
+Get the Toolbox with ceph commands:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/toolbox.yaml
 sleep 5
 ```
 
-The deployment with `rook-ceph-tools` was created.
+The deployment with `rook-ceph-tools` was created:
 
 ```bash
 kubectl get deployment,pods --namespace=rook-ceph -o wide -l app=rook-ceph-tools
@@ -258,7 +258,7 @@ NAME                                   READY     STATUS    RESTARTS   AGE       
 pod/rook-ceph-tools-76c7d559b6-qth8c   1/1       Running   0          11s       192.168.250.12   pruzicka-k8s-istio-demo-node02
 ```
 
-Create a storage class based on the Ceph RBD volume plugin.
+Create a storage class based on the Ceph RBD volume plugin:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/storageclass.yaml
@@ -266,13 +266,13 @@ kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/exa
 sleep 20
 ```
 
-Set `rook-ceph-block` as default storageclass.
+Set `rook-ceph-block` as default Storage Class:
 
 ```bash
 kubectl patch storageclass rook-ceph-block -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 ```
 
-Check the storageclasses.
+Check the Storage Classes:
 
 ```bash
 kubectl describe storageclass
@@ -293,7 +293,7 @@ VolumeBindingMode:     Immediate
 Events:                <none>
 ```
 
-See the CephBlockPool.
+See the CephBlockPool:
 
 ```bash
 kubectl describe cephblockpool --namespace=rook-ceph
@@ -320,7 +320,7 @@ Spec:
 Events:    <none>
 ```
 
-Check the status of your Ceph installation.
+Check the status of your Ceph installation:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph status
@@ -345,7 +345,7 @@ Output:
     pgs:     100 active+clean
 ```
 
-Ceph status.
+Ceph status:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd status
@@ -363,7 +363,7 @@ Output:
 +----+--------------------------------+-------+-------+--------+---------+--------+---------+-----------+
 ```
 
-Check health detail of Ceph cluster.
+Check health of Ceph cluster:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph health detail
@@ -375,13 +375,13 @@ Output:
 HEALTH_OK
 ```
 
-Check monitor quorum status of Ceph.
+Check monitor quorum status of Ceph:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph quorum_status --format json-pretty
 ```
 
-Dump monitoring information from Ceph.
+Dump monitoring information from Ceph:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph mon dump
@@ -400,7 +400,7 @@ created 2019-01-29 09:43:53.046981
 dumped monmap epoch 3
 ```
 
-Check the cluster usage status.
+Check the cluster usage status:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph df
@@ -417,7 +417,7 @@ POOLS:
     replicapool     1       0 B         0        40 GiB           0
 ```
 
-Check OSD usage of Ceph.
+Check OSD usage of Ceph:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd df
@@ -434,7 +434,7 @@ ID CLASS WEIGHT  REWEIGHT SIZE   USE     AVAIL  %USE  VAR  PGS
 MIN/MAX VAR: 0.94/1.08  STDDEV: 1.40
 ```
 
-Check the Ceph monitor.
+Check the Ceph monitor:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph mon stat
@@ -446,7 +446,7 @@ Output:
 e3: 3 mons at {a=10.109.40.168:6790/0,b=10.103.75.150:6790/0,c=10.96.51.185:6790/0}, election epoch 16, leader 0 c, quorum 0,1,2 c,b,a
 ```
 
-Check OSD stats.
+Check OSD stats:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd stat
@@ -458,7 +458,7 @@ Output:
 3 osds: 3 up, 3 in; epoch: e20
 ```
 
-Check pool stats.
+Check pool stats:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd pool stats
@@ -471,7 +471,7 @@ pool replicapool id 1
   nothing is going on
 ```
 
-Check pg stats.
+Check pg stats:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph pg stat
@@ -483,7 +483,7 @@ Output:
 100 pgs: 100 active+clean; 0 B data, 13 GiB used, 44 GiB / 58 GiB avail
 ```
 
-List the Ceph pools in detail.
+List the Ceph pools in detail:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd pool ls detail
@@ -495,7 +495,7 @@ Output:
 pool 1 'replicapool' replicated size 1 min_size 1 crush_rule 1 object_hash rjenkins pg_num 100 pgp_num 100 last_change 20 flags hashpspool stripe_width 0 application rbd
 ```
 
-Check the CRUSH map view of OSDs.
+Check the CRUSH map view of OSDs:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd tree
@@ -514,7 +514,7 @@ ID CLASS WEIGHT  TYPE NAME                               STATUS REWEIGHT PRI-AFF
  2   hdd 0.01880         osd.2                               up  1.00000 1.00000
 ```
 
-List the cluster authentication keys.
+List the cluster authentication keys:
 
 ```bash
 kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph auth list
@@ -522,20 +522,20 @@ kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools
 
 ## Install ElasticSearch, Kibana, Fluentbit
 
-Add ElasticSearch operator to helm.
+Add ElasticSearch operator to Helm:
 
 ```bash
 helm repo add es-operator https://raw.githubusercontent.com/upmc-enterprises/elasticsearch-operator/master/charts/
 ```
 
-Install ElasticSearch operator.
+Install ElasticSearch operator:
 
 ```bash
 helm install --wait --name elasticsearch-operator es-operator/elasticsearch-operator --set rbac.enabled=True --namespace es-operator
 sleep 30
 ```
 
-Check how the operator looks like.
+Check how the operator looks like:
 
 ```bash
 kubectl get svc,deploy,po --namespace=es-operator -o wide
@@ -551,7 +551,7 @@ NAME                                          READY     STATUS    RESTARTS   AGE
 pod/elasticsearch-operator-5dc59b8cc5-hq9hg   0/1       Running   0          32s       10.244.2.8   pruzicka-k8s-istio-demo-node03
 ```
 
-Install ElasticSearch cluster.
+Install ElasticSearch cluster:
 
 ```bash
 helm install --wait --name=elasticsearch --namespace logging es-operator/elasticsearch \
@@ -562,7 +562,7 @@ helm install --wait --name=elasticsearch --namespace logging es-operator/elastic
 sleep 400
 ```
 
-Show ElasticSearch components.
+Show ElasticSearch components:
 
 ```bash
 kubectl get svc,deploy,po,pvc --namespace=logging -o wide
@@ -605,7 +605,7 @@ persistentvolumeclaim/es-data-es-master-elasticsearch-cluster-rook-ceph-block-1 
 persistentvolumeclaim/es-data-es-master-elasticsearch-cluster-rook-ceph-block-2   Bound     pvc-82448ea7-23ac-11e9-8a8d-fa163e64621e   1Gi        RWO            rook-ceph-block   1m
 ```
 
-List provisioned ElasticSearch clusters.
+List provisioned ElasticSearch clusters:
 
 ```bash
 kubectl get elasticsearchclusters --all-namespaces
@@ -618,7 +618,7 @@ NAMESPACE   NAME                    AGE
 logging     elasticsearch-cluster   7m
 ```
 
-Install Fluentbit.
+Install Fluentbit:
 
 ```bash
 helm install --wait stable/fluent-bit --name=fluent-bit --namespace=logging \
@@ -629,7 +629,7 @@ helm install --wait stable/fluent-bit --name=fluent-bit --namespace=logging \
   --set backend.es.tls_verify=off
 ```
 
-Configure port forwarding for Kibana
+Configure port forwarding for Kibana:
 
 ```bash
 # Kibana UI - https://localhost:5601
@@ -662,7 +662,7 @@ logging     pod/fluent-bit-fluent-bit-tnxj2   1/1       Running   0          7h 
 
 ## Istio Architecture
 
-Few notes about Istio architecture.
+Few notes about Istio architecture...
 
 ![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg)
 
@@ -684,7 +684,7 @@ Few notes about Istio architecture.
 
 ## Install Istio
 
-Either download Istio directly from [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases) or get the latest version by using curl.
+Either download Istio directly from [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases) or get the latest version by using curl:
 
 ```bash
 test -d files || mkdir files
@@ -692,13 +692,13 @@ cd files
 curl -L https://git.io/getLatestIstio | sh -
 ```
 
-Change the directory to the Istio installation files location.
+Change the directory to the Istio installation files location:
 
 ```bash
 cd istio*
 ```
 
-Install Istio using helm.
+Install Istio using Helm:
 
 ```bash
 helm install --wait --name istio --namespace istio-system install/kubernetes/helm/istio \
@@ -714,13 +714,13 @@ helm install --wait --name istio --namespace istio-system install/kubernetes/hel
   --set tracing.enabled=true
 ```
 
-See the istio components.
+See the Istio components:
 
 ```bash
 kubectl get --namespace=istio-system svc,deployment,pods -o wide
 ```
 
-Output
+Output:
 
 ```shell
 NAME                             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                                                                                                                   AGE       SELECTOR
@@ -774,7 +774,7 @@ pod/prometheus-76b7745b64-x8f85               1/1       Running     0          1
 pod/servicegraph-5c4485945b-xdv56             1/1       Running     0          12m       10.244.1.20   pruzicka-k8s-istio-demo-node02
 ```
 
-Configure Istio with a new log type and send those logs to the FluentD.
+Configure Istio with a new log type and send those logs to the FluentD:
 
 ```bash
 kubectl apply -f ../../yaml/fluentd-istio.yaml
@@ -786,13 +786,13 @@ Check how Istio can be used and how it works...
 
 ### Check + Enable Istio in default namespace
 
-Let the default namespace to use istio injection.
+Let the default namespace to use Istio injection:
 
 ```bash
 kubectl label namespace default istio-injection=enabled
 ```
 
-Check namespaces.
+Check namespaces:
 
 ```bash
 kubectl get namespace -L istio-injection
@@ -812,7 +812,7 @@ rook-ceph          Active    34m
 rook-ceph-system   Active    36m
 ```
 
-Configure port forwarding for Istio services
+Configure port forwarding for Istio services:
 
 ```bash
 # Jaeger - http://localhost:16686
@@ -842,9 +842,9 @@ The Bookinfo application is broken into four separate microservices:
 
 There are 3 versions of the `reviews` microservice:
 
-* Version v1 - doesn’t call the **ratings service**.
-* Version v2 - calls the ratings service, and displays each rating as 1 to 5 **black stars**.
-* Version v3 - calls the ratings service, and displays each rating as 1 to 5 **red stars**.
+* Version `v1` - doesn’t call the **ratings service**.
+* Version `v2` - calls the ratings service, and displays each rating as 1 to 5 **black stars**.
+* Version `v3` - calls the ratings service, and displays each rating as 1 to 5 **red stars**.
 
 [Bookinfo](https://istio.io/docs/examples/bookinfo/) application architecture
 
@@ -852,7 +852,7 @@ There are 3 versions of the `reviews` microservice:
 
 ![Application Architecture with Istio](https://istio.io/docs/examples/bookinfo/withistio.svg)
 
-Deploy the demo application [https://istio.io/docs/examples/bookinfo/](https://istio.io/docs/examples/bookinfo/)
+Deploy the demo of [Bookinfo](https://istio.io/docs/examples/bookinfo/) application:
 
 ```bash
 kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
@@ -895,14 +895,14 @@ pod/reviews-v2-7fc9bb6dcf-qp4vs           2/2       Running   0          3m     
 pod/reviews-v3-c995979bc-zf2kg            2/2       Running   0          3m        10.244.2.42   pruzicka-k8s-istio-demo-node02
 ```
 
-Check the container details - you should see also container `istio-proxy` next to `productpage`
+Check the container details - you should see also container `istio-proxy` next to `productpage`:
 
 ```bash
 kubectl describe pod -l app=productpage
-kubectl logs $(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}') istio-proxy
+kubectl logs $(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}') istio-proxy --tail=5
 ```
 
-Define the ingress gateway for the application
+Define the ingress gateway for the application:
 
 ```bash
 cat samples/bookinfo/networking/bookinfo-gateway.yaml
@@ -910,7 +910,7 @@ kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
 sleep 5
 ```
 
-Confirm the gateway has been created
+Confirm the gateway has been created:
 
 ```bash
 kubectl get gateway,virtualservice
@@ -926,7 +926,7 @@ NAME                                          AGE
 virtualservice.networking.istio.io/bookinfo   7s
 ```
 
-Determining the ingress IP and ports when using a node port
+Determining the ingress IP and ports when using a node port:
 
 ```bash
 export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
@@ -943,7 +943,7 @@ Output:
 31380 | 31390 | 172.16.241.103 | 172.16.241.103:31380
 ```
 
-Confirm the app is running
+Confirm the app is running:
 
 ```bash
 curl -o /dev/null -s -w "%{http_code}\n" -A "Mozilla/5.0 (iPhone; U; CPU iPhone OS 4_3_3 like Mac OS X; en-us) AppleWebKit/533.17.9 (KHTML, like Gecko) Version/5.0.2 Mobile/8J2 Safari/6533.18.5" http://${GATEWAY_URL}/productpage
@@ -974,10 +974,10 @@ Open the browser with these pages:
 * [http://localhost:16686](http://localhost:16686)
 * [http://localhost:3000](http://localhost:3000) (Grafana -> Home -> Istio -> Istio Performance Dashboard, Istio Service Dashboard, Istio Workload Dashboard )
 
-Generate some traffic for next 5 minutes...
+Generate some traffic for next 5 minutes to gether some data:
 
 ```bash
-siege --concurrent=1 -q --internet --time=5M $GATEWAY_URL/productpage &
+siege --log=/tmp/siege --concurrent=1 -q --internet --time=5M $GATEWAY_URL/productpage &
 ```
 
 ![Istio Graph](images/istio_kiali_graph.gif "Istio Graph")
@@ -992,7 +992,7 @@ Apply the virtual services which will route all traffic to **v1** of each micros
 kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
-Display the defined routes
+Display the defined routes:
 
 ```bash
 kubectl get virtualservices -o yaml
@@ -1061,8 +1061,6 @@ spec:
         subset: v1
 ```
 
-Test
-
 * Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and notice that the reviews part of the page displays with no rating stars, no matter how many times you refresh.
 
 ### Route based on user identity
@@ -1109,9 +1107,8 @@ spec:
         subset: v1
 ```
 
-Test
-
 * On the /productpage of the Bookinfo app, log in as user `jason` and refresh the browser.
+
 * Log in as another user (pick any name you wish) and refresh the browser
 
 ### Injecting an HTTP delay fault
@@ -1183,7 +1180,7 @@ Create a fault injection rule to send an HTTP abort for user `jason`:
 kubectl apply -f samples/bookinfo/networking/virtual-service-ratings-test-abort.yaml
 ```
 
-Confirm the rule was created
+Confirm the rule was created:
 
 ```bash
 kubectl get virtualservice ratings -o yaml
@@ -1218,8 +1215,6 @@ spec:
         host: ratings
         subset: v1
 ```
-
-Testing
 
 * On the `/productpage`, log in as user `jason` - the page loads immediately and the product ratings not available message appears.
 
@@ -1304,13 +1299,13 @@ Mirroring sends a copy of live traffic to a mirrored service.
 
 First all traffic will go to `reviews:v1`, then the rule will be applied to mirror a portion of traffic to `reviews:v2`.
 
-Apply the virtual services which will route all traffic to **v1** of each microservice:
+Apply the virtual services which will route all traffic to `v1` of each microservice:
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 ```
 
-Change the route rule to mirror traffic to v2:
+Change the route rule to mirror traffic to `v2`:
 
 ```bash
 cat <<EOF | kubectl apply -f -
@@ -1336,8 +1331,8 @@ EOF
 Check the logs on both pods `reviews:v1` and `reviews:v2`:
 
 ```bash
-kubectl logs $(kubectl get pod -l app=reviews,version=v1 -o jsonpath='{.items[0].metadata.name}') istio-proxy
-kubectl logs $(kubectl get pod -l app=reviews,version=v2 -o jsonpath='{.items[0].metadata.name}') istio-proxy
+kubectl logs $(kubectl get pod -l app=reviews,version=v1 -o jsonpath='{.items[0].metadata.name}') istio-proxy --tail=10
+kubectl logs $(kubectl get pod -l app=reviews,version=v2 -o jsonpath='{.items[0].metadata.name}') istio-proxy --tail=10
 ```
 
 Do a simple query:
@@ -1354,86 +1349,90 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
 ## List of GUIs
 
-* Jaeger [https://istio.io/docs/tasks/telemetry/distributed-tracing/](https://istio.io/docs/tasks/telemetry/distributed-tracing/)
+* Jaeger - [https://istio.io/docs/tasks/telemetry/distributed-tracing/](https://istio.io/docs/tasks/telemetry/distributed-tracing/)
 
-```shell
-kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
-```
+    ```shell
+    kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
+    ```
 
-Link: [http://localhost:16686](http://localhost:16686)
+    Link: [http://localhost:16686](http://localhost:16686)
 
-* Prometheus UI [https://istio.io/docs/tasks/telemetry/querying-metrics/](https://istio.io/docs/tasks/telemetry/querying-metrics/)
+* Prometheus UI - [https://istio.io/docs/tasks/telemetry/querying-metrics/](https://istio.io/docs/tasks/telemetry/querying-metrics/)
 
-```shell
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
-```
+    ```shell
+    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
+    ```
 
-Link: [http://localhost:9090/graph](http://localhost:9090/graph)
+    Link: [http://localhost:9090/graph](http://localhost:9090/graph)
 
-* Grafana [https://istio.io/docs/tasks/telemetry/using-istio-dashboard/](https://istio.io/docs/tasks/telemetry/using-istio-dashboard/)
+* Grafana [https://istio.io/docs/tasks/telemetry/using-istio-dashboard/] - (https://istio.io/docs/tasks/telemetry/using-istio-dashboard/)
 
-```shell
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
-```
+    ```shell
+    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
+    ```
 
-Link: [http://localhost:3000/dashboard/db/istio-mesh-dashboard](http://localhost:3000/dashboard/db/istio-mesh-dashboard)
+    Link: [http://localhost:3000/dashboard/db/istio-mesh-dashboard](http://localhost:3000/dashboard/db/istio-mesh-dashboard)
 
-* Kiali UI [https://istio.io/docs/tasks/telemetry/kiali/](https://istio.io/docs/tasks/telemetry/kiali/)
+* Kiali UI - [https://istio.io/docs/tasks/telemetry/kiali/](https://istio.io/docs/tasks/telemetry/kiali/)
 
-```shell
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001 &
-```
+    ```shell
+    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001 &
+    ```
 
-Login: admin
-Password: admin
-Link: [http://localhost:20001](http://localhost:20001) (admin/admin)
+    Login: admin
 
-* Servicegraph UI [https://istio.io/docs/tasks/telemetry/servicegraph/](https://istio.io/docs/tasks/telemetry/servicegraph/)
+    Password: admin
 
-```shell
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}') 8088:8088 &
-```
+    Link: [http://localhost:20001](http://localhost:20001)
 
-Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html)
+* Servicegraph UI - [https://istio.io/docs/tasks/telemetry/servicegraph/](https://istio.io/docs/tasks/telemetry/servicegraph/)
+
+    ```shell
+    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}') 8088:8088 &
+    ```
+
+    Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html)
 
 * Kibana UI
 
-```shell
-kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
-```
+    ```shell
+    kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+    ```
 
-Link: [https://localhost:5601](https://localhost:5601)
+    Link: [https://localhost:5601](https://localhost:5601)
 
 * Cerbero
 
-```shell
-kubectl -n logging port-forward $(kubectl -n logging get pod -l role=cerebro -o jsonpath='{.items[0].metadata.name}') 9000:9000 &
-```
+    ```shell
+    kubectl -n logging port-forward $(kubectl -n logging get pod -l role=cerebro -o jsonpath='{.items[0].metadata.name}') 9000:9000 &
+    ```
 
-Link: [http://localhost:9000](http://localhost:9000)
+    Link: [http://localhost:9000](http://localhost:9000)
 
 * Ceph Dashboard
 
-```shell
-kubectl -n rook-ceph port-forward $(kubectl -n rook-ceph get pod -l app=rook-ceph-mgr -o jsonpath='{.items[0].metadata.name}') 8443:8443 &
-```
+    ```shell
+    kubectl -n rook-ceph port-forward $(kubectl -n rook-ceph get pod -l app=rook-ceph-mgr -o jsonpath='{.items[0].metadata.name}') 8443:8443 &
+    ```
 
-Login: admin
-Password: kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o yaml | grep "password:" | awk '{print $2}' | base64 --decode
-Link: [https://localhost:8443/ceph-dashboard](https://localhost:8443/ceph-dashboard)
+    Login: admin
 
-## Handy links
+    Password: `kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o yaml | grep "password:" | awk '{print $2}' | base64 --decode`
 
-* [https://www.youtube.com/watch?v=sh0F7FMFVSI](https://www.youtube.com/watch?v=sh0F7FMFVSI)
+    Link: [https://localhost:8443/ceph-dashboard](https://localhost:8443/ceph-dashboard)
 
-* [https://www.youtube.com/watch?v=RVScqW8_liw](https://www.youtube.com/watch?v=RVScqW8_liw)
+## Links
 
-* [https://www.youtube.com/watch?v=OAW5rbttic0](https://www.youtube.com/watch?v=OAW5rbttic0)
+* [Istio Service Mesh by Mete Atamel @ .NET Conf UY v2018](https://www.youtube.com/watch?v=sh0F7FMFVSI)
 
-* [https://istio101.gitbook.io/lab/workshop/](https://istio101.gitbook.io/lab/workshop/)
+* [Liam White - Istio @ GDGReading DevFest 2018](https://www.youtube.com/watch?v=RVScqW8_liw)
 
-* [https://github.com/leecalcote/istio-service-mesh-workshop](https://github.com/leecalcote/istio-service-mesh-workshop)
+* [Istio Service Mesh & pragmatic microservices architecture - Álex Soto](https://www.youtube.com/watch?v=OAW5rbttic0)
 
-* [https://github.com/retroryan/istio-workshop](https://github.com/retroryan/istio-workshop)
+* [Introduction - Istio 101 Lab](https://istio101.gitbook.io/lab/workshop/)
 
-* [https://eksworkshop.com/servicemesh/](https://eksworkshop.com/servicemesh/)
+* [Using Istio Workshop by Layer5.io](https://github.com/leecalcote/istio-service-mesh-workshop)
+
+* [Istio Workshop by Ray Tsang](https://github.com/retroryan/istio-workshop)
+
+* [Amazon EKS Workshop - Service Mesh with Istio](https://eksworkshop.com/servicemesh/)
