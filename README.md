@@ -1341,6 +1341,8 @@ Do a simple query:
 curl -o /dev/null -s -w "%{http_code}\n" http://${GATEWAY_URL}/productpage
 ```
 
+![Mirroring Kiali Graph](images/istio_kiali_mirroring.gif "Mirroring Kiali Graph")
+
 * Remove the application routing rules:
 
 ```bash
@@ -1365,7 +1367,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:9090/graph](http://localhost:9090/graph)
 
-* Grafana [https://istio.io/docs/tasks/telemetry/using-istio-dashboard/] - (https://istio.io/docs/tasks/telemetry/using-istio-dashboard/)
+* Grafana - [https://istio.io/docs/tasks/telemetry/using-istio-dashboard/](https://istio.io/docs/tasks/telemetry/using-istio-dashboard/)
 
     ```shell
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
