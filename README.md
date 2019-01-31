@@ -2,7 +2,7 @@
 
 [![Build Status](https://travis-ci.com/ruzickap/k8s-istio-demo.svg?branch=master)](https://travis-ci.com/ruzickap/k8s-istio-demo)
 
-[https://ruzickap.gitbook.io/k8s-istio-demo/](https://ruzickap.gitbook.io/k8s-istio-demo/)
+[GitBook version](https://ruzickap.gitbook.io/k8s-istio-demo/)
 
 Find below few commands showing basics of Istio...
 
@@ -970,6 +970,7 @@ kubectl get destinationrules -o yaml
 Open the browser with these pages:
 
 * [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html)
+* [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
 * [http://localhost:20001](http://localhost:20001) (Graph)
 * [http://localhost:16686](http://localhost:16686)
 * [http://localhost:3000](http://localhost:3000) (Grafana -> Home -> Istio -> Istio Performance Dashboard, Istio Service Dashboard, Istio Workload Dashboard )
@@ -1111,6 +1112,16 @@ spec:
 
 * Log in as another user (pick any name you wish) and refresh the browser
 
+You can do the same with user-agent header for example:
+
+```yaml
+  http:
+    - match:
+        - headers:
+            user-agent:
+              regex: '.*Firefox.*'
+```
+
 ### Injecting an HTTP delay fault
 
 [https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-delay-fault](https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-delay-fault)
@@ -1229,6 +1240,8 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 ### Weight-based routing
 
 [https://istio.io/docs/tasks/traffic-management/traffic-shifting/#apply-weight-based-routing](https://istio.io/docs/tasks/traffic-management/traffic-shifting/#apply-weight-based-routing)
+
+In **Canary Deployments**, newer versions of services are incrementally rolled out to users to minimize the risk and impact of any bugs introduced by the newer version.
 
 Route a percentage of traffic to one service or another - send **%50** of traffic to `reviews:v1` and **%50** to `reviews:v3` and finally complete the migration by sending %100 of traffic to `reviews:v3`.
 
@@ -1393,7 +1406,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}') 8088:8088 &
     ```
 
-    Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html)
+    Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html), [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
 
 * Kibana UI
 
