@@ -244,6 +244,7 @@ Install Rook Operator (Ceph storage for k8s):
 ```bash
 helm repo add rook-stable https://charts.rook.io/stable
 helm install --wait --name rook-ceph --namespace rook-ceph-system rook-stable/rook-ceph
+sleep 5
 ```
 
 See how the rook-ceph-system should look like:
@@ -272,7 +273,7 @@ Create your Rook cluster:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml
-sleep 200
+sleep 300
 ```
 
 Check what was created in `rook-ceph` namespace:
@@ -317,7 +318,7 @@ Get the Toolbox with ceph commands:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/toolbox.yaml
-sleep 5
+sleep 10
 ```
 
 The deployment with `rook-ceph-tools` was created:
@@ -637,7 +638,7 @@ helm install --wait --name=elasticsearch --namespace logging es-operator/elastic
   --set cerebro.enabled=true \
   --set storage.class=rook-ceph-block \
   --set clientReplicas=3,masterReplicas=3,dataReplicas=3
-sleep 400
+sleep 700
 ```
 
 Show ElasticSearch components:
@@ -767,7 +768,7 @@ Either download Istio directly from [https://github.com/istio/istio/releases](ht
 ```bash
 test -d files || mkdir files
 cd files
-curl -L https://git.io/getLatestIstio | sh -
+curl -sL https://git.io/getLatestIstio | sh -
 ```
 
 Change the directory to the Istio installation files location:
@@ -779,7 +780,7 @@ cd istio*
 Install Istio using Helm:
 
 ```bash
-helm install --wait --name istio --namespace istio-system install/kubernetes/helm/istio \
+helm install --wait --timeout 2500 --name istio --namespace istio-system install/kubernetes/helm/istio \
   --set gateways.istio-ingressgateway.type=NodePort \
   --set gateways.istio-egressgateway.type=NodePort \
   --set grafana.enabled=true \
