@@ -3,7 +3,7 @@
 MYUSER="ubuntu"
 SSH_ARGS="-o LogLevel=ERROR -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no"
 POD_NETWORK_CIDR="10.244.0.0/16"
-KUBERNETES_VERSION="1.13.2"
+KUBERNETES_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt | tr -d v)
 CNI_URL="https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
 
 INSTALL_KUBERNETES="
