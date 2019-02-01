@@ -3,6 +3,7 @@ image: ubuntu1804
 stack: node 8
 
 install:
+  - curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
   - export KUBERNETES_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
   - sudo apt install -qq -y jq siege socat
   # Install Terraform

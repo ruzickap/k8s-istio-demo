@@ -244,7 +244,7 @@ Install Rook Operator (Ceph storage for k8s):
 ```bash
 helm repo add rook-stable https://charts.rook.io/stable
 helm install --wait --name rook-ceph --namespace rook-ceph-system rook-stable/rook-ceph
-sleep 5
+sleep 10
 ```
 
 See how the rook-ceph-system should look like:
