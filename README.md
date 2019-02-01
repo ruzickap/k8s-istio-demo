@@ -47,13 +47,12 @@ apt-get update
 apt-get install -y kubectl
 ```
 
-Install Terraform and Helm...
+Install Terraform...
 
 ```bash
 TERRAFORM_LATEST_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')
 curl --silent --location https://releases.hashicorp.com/terraform/${TERRAFORM_LATEST_VERSION}/terraform_${TERRAFORM_LATEST_VERSION}_linux_amd64.zip --output /tmp/terraform_linux_amd64.zip
 unzip -o /tmp/terraform_linux_amd64.zip -d /usr/local/bin/
-curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
 ```
 
 Change directory to `/mnt` where the git repository is mounted:
@@ -208,13 +207,13 @@ apt-get update
 apt-get install -y kubectl socat
 ```
 
-Install Helm...
+## Install Helm
+
+Install Helm binary locally:
 
 ```bash
 curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
 ```
-
-## Install Helm
 
 Install Tiller (the Helm server-side component) into the Kubernetes Cluster:
 

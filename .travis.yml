@@ -1,5 +1,3 @@
-sudo: required
-
 # We need the systemd for the kubeadm and it's default from 16.04+
 dist: xenial
 
@@ -61,5 +59,5 @@ script:
   - |
     echo '{ "ignorePatterns": [ { "pattern": "^(http|https)://localhost" } ] }' > config.json
     markdown-link-check --config config.json ./README.md
-  # k8s commands
-  - sed -n '/^```bash/,/^```/p' README.md | sed '/^```*/d' | sed -n '/^kubectl get nodes -o wide/,$p' | sed '/^helm repo add rook-stable/,/kubectl get -l app=fluent-bit svc,pods --all-namespaces -o wide/d' | sh -eux
+  # k8s commands (use everything starting from Helm installation except rook and elasticsearch - because of TravisCI bandwidth limitation)
+  - sed -n '/^```bash/,/^```/p' README.md | sed '/^```*/d' | sed -n '/^curl https:\/\/raw.githubusercontent.com\/helm\/helm\/master\/scripts\/get | bash/,$p' | sed '/^helm repo add rook-stable/,/kubectl get -l app=fluent-bit svc,pods --all-namespaces -o wide/d' | sh -eux
