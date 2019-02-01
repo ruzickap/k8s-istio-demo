@@ -13,7 +13,56 @@ Find below few commands showing basics of Istio...
 * [Siege](https://github.com/JoeDog/siege) (siege package)
 * [Terraform](https://www.terraform.io/)
 
-## Provision VMs in OpenStack
+or just
+
+* [Docker](https://www.docker.com/)
+
+## Install Kubernetes to Opnestack VMs
+
+The following sections will create VMs in openstack and install k8s into them.
+
+### Prepare the working environment inside Docker
+
+You can skip this part if you have [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), [Helm](https://helm.sh/), [Siege](https://github.com/JoeDog/siege) and [Terraform](https://www.terraform.io/) installed.
+
+Run Ubuntu docker image and mount the directory there:
+
+```bash
+docker run -it -rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $PWD:/mnt ubuntu
+```
+
+Install necessary software into the docker container:
+
+```bash
+apt update
+apt install -y apt-transport-https curl firefox git gnupg jq openssh-client siege unzip vim
+```
+
+Install kubernetes-client package (kubectl):
+
+```bash
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+apt-get update
+apt-get install -y kubectl
+```
+
+Install Terraform and Helm...
+
+```bash
+TERRAFORM_LATEST_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')
+curl --silent --location https://releases.hashicorp.com/terraform/${TERRAFORM_LATEST_VERSION}/terraform_${TERRAFORM_LATEST_VERSION}_linux_amd64.zip --output /tmp/terraform_linux_amd64.zip
+unzip -o /tmp/terraform_linux_amd64.zip -d /usr/local/bin/
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
+```
+
+Change directory to `/mnt` where the git repository is mounted:
+
+```bash
+cd /mnt
+```
+
+### Provision VMs in OpenStack
 
 Start 3 VMs (one master and 2 workers) where the k8s will be installed.
 
@@ -21,9 +70,12 @@ Generate ssh keys if not exists:
 
 ```bash
 test -f $HOME/.ssh/id_rsa || ( install -m 0700 -d $HOME/.ssh && ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N "" )
+# ssh-agent must be running...
+test -n "$SSH_AUTH_SOCK" || eval `ssh-agent`
+ssh-add
 ```
 
-Clone this repo:
+Clone this git repository:
 
 ```bash
 git clone https://github.com/ruzickap/k8s-istio-demo
@@ -42,6 +94,7 @@ openstack_password                                 = "password"
 openstack_tenant_name                              = "mirantis-services-team"
 openstack_user_name                                = "pruzicka"
 openstack_user_domain_name                         = "ldap_mirantis"
+prefix                                             = "pruzicka-k8s-istio-demo"
 EOF
 ```
 
@@ -80,7 +133,7 @@ vms_public_ip = [
 
 At the end of the output you should see 3 IP addresses which should be accessible by ssh using your public key (`~/.ssh/id_rsa.pub`).
 
-## Install k8s
+### Install k8s
 
 Install k8s using kubeadm to the provisioned VMs:
 
@@ -133,6 +186,32 @@ kube-system   pod/kube-proxy-8vfm2                                         1/1  
 kube-system   pod/kube-proxy-qmtvr                                         1/1       Running   0          1m        192.168.250.12   pruzicka-k8s-istio-demo-node02
 kube-system   pod/kube-proxy-r8hj8                                         1/1       Running   0          2m        192.168.250.11   pruzicka-k8s-istio-demo-node01
 kube-system   pod/kube-scheduler-pruzicka-k8s-istio-demo-node01            1/1       Running   0          1m        192.168.250.11   pruzicka-k8s-istio-demo-node01
+```
+
+## Use Minikube
+
+Install Minikube if needed: [https://kubernetes.io/docs/tasks/tools/install-minikube/](https://kubernetes.io/docs/tasks/tools/install-minikube/)
+
+Start minikube
+
+```bash
+KUBERNETES_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt | tr -d v)
+sudo minikube start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=v${KUBERNETES_VERSION}
+```
+
+Install kubernetes-client package (kubectl):
+
+```bash
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+apt-get update
+apt-get install -y kubectl socat
+```
+
+Install Helm...
+
+```bash
+curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
 ```
 
 ## Install Helm
