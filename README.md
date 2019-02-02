@@ -212,7 +212,7 @@ apt-get install -y kubectl socat
 Install Helm binary locally:
 
 ```bash
-curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
+curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
 ```
 
 Install Tiller (the Helm server-side component) into the Kubernetes Cluster:
@@ -273,7 +273,14 @@ Create your Rook cluster:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml
-sleep 300
+sleep 50
+```
+
+Get the Toolbox with ceph commands:
+
+```bash
+kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/toolbox.yaml
+sleep 250
 ```
 
 Check what was created in `rook-ceph` namespace:
@@ -285,56 +292,7 @@ kubectl get svc,deploy,po --namespace=rook-ceph -o wide
 Output:
 
 ```shell
-NAME                              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE       SELECTOR
-service/rook-ceph-mgr             ClusterIP   10.103.130.126   <none>        9283/TCP   57s       app=rook-ceph-mgr,rook_cluster=rook-ceph
-service/rook-ceph-mgr-dashboard   ClusterIP   10.108.113.191   <none>        8443/TCP   57s       app=rook-ceph-mgr,rook_cluster=rook-ceph
-service/rook-ceph-mon-a           ClusterIP   10.109.40.168    <none>        6790/TCP   4m        app=rook-ceph-mon,ceph_daemon_id=a,mon=a,mon_cluster=rook-ceph,rook_cluster=rook-ceph
-service/rook-ceph-mon-b           ClusterIP   10.103.75.150    <none>        6790/TCP   3m        app=rook-ceph-mon,ceph_daemon_id=b,mon=b,mon_cluster=rook-ceph,rook_cluster=rook-ceph
-service/rook-ceph-mon-c           ClusterIP   10.96.51.185     <none>        6790/TCP   3m        app=rook-ceph-mon,ceph_daemon_id=c,mon=c,mon_cluster=rook-ceph,rook_cluster=rook-ceph
-
-NAME                                    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS   IMAGES          SELECTOR
-deployment.extensions/rook-ceph-mgr-a   1         1         1            1           1m        mgr          ceph/ceph:v13   app=rook-ceph-mgr,ceph_daemon_id=a,instance=a,mgr=a,rook_cluster=rook-ceph
-deployment.extensions/rook-ceph-mon-a   1         1         1            1           4m        mon          ceph/ceph:v13   app=rook-ceph-mon,ceph_daemon_id=a,mon=a,mon_cluster=rook-ceph,rook_cluster=rook-ceph
-deployment.extensions/rook-ceph-mon-b   1         1         1            1           3m        mon          ceph/ceph:v13   app=rook-ceph-mon,ceph_daemon_id=b,mon=b,mon_cluster=rook-ceph,rook_cluster=rook-ceph
-deployment.extensions/rook-ceph-mon-c   1         1         1            1           3m        mon          ceph/ceph:v13   app=rook-ceph-mon,ceph_daemon_id=c,mon=c,mon_cluster=rook-ceph,rook_cluster=rook-ceph
-deployment.extensions/rook-ceph-osd-0   1         1         1            1           44s       osd          ceph/ceph:v13   app=rook-ceph-osd,ceph-osd-id=0,rook_cluster=rook-ceph
-deployment.extensions/rook-ceph-osd-1   1         1         1            1           44s       osd          ceph/ceph:v13   app=rook-ceph-osd,ceph-osd-id=1,rook_cluster=rook-ceph
-deployment.extensions/rook-ceph-osd-2   1         1         1            1           43s       osd          ceph/ceph:v13   app=rook-ceph-osd,ceph-osd-id=2,rook_cluster=rook-ceph
-
-NAME                                                             READY     STATUS      RESTARTS   AGE       IP           NODE
-pod/rook-ceph-mgr-a-669f5b47fc-ptwcr                             1/1       Running     0          1m        10.244.2.5   pruzicka-k8s-istio-demo-node03
-pod/rook-ceph-mon-a-798d774f55-nkmmr                             1/1       Running     0          4m        10.244.0.5   pruzicka-k8s-istio-demo-node01
-pod/rook-ceph-mon-b-56dbd4f886-z9nbj                             1/1       Running     0          3m        10.244.1.6   pruzicka-k8s-istio-demo-node02
-pod/rook-ceph-mon-c-79d54b78f7-zd7zx                             1/1       Running     0          3m        10.244.2.4   pruzicka-k8s-istio-demo-node03
-pod/rook-ceph-osd-0-57c5b499b6-p2fsl                             1/1       Running     0          44s       10.244.1.8   pruzicka-k8s-istio-demo-node02
-pod/rook-ceph-osd-1-7ddbfbfb5f-qrdzx                             1/1       Running     0          44s       10.244.0.7   pruzicka-k8s-istio-demo-node01
-pod/rook-ceph-osd-2-66c4d8969c-tt4k9                             1/1       Running     0          43s       10.244.2.7   pruzicka-k8s-istio-demo-node03
-pod/rook-ceph-osd-prepare-pruzicka-k8s-istio-demo-node01-ffsrp   0/2       Completed   0          49s       10.244.0.6   pruzicka-k8s-istio-demo-node01
-pod/rook-ceph-osd-prepare-pruzicka-k8s-istio-demo-node02-65mnz   0/2       Completed   0          49s       10.244.1.7   pruzicka-k8s-istio-demo-node02
-pod/rook-ceph-osd-prepare-pruzicka-k8s-istio-demo-node03-kz857   0/2       Completed   0          49s       10.244.2.6   pruzicka-k8s-istio-demo-node03
-```
-
-Get the Toolbox with ceph commands:
-
-```bash
-kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/toolbox.yaml
-sleep 10
-```
-
-The deployment with `rook-ceph-tools` was created:
-
-```bash
-kubectl get deployment,pods --namespace=rook-ceph -o wide -l app=rook-ceph-tools
-```
-
-Output:
-
-```shell
-NAME                                    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS        IMAGES             SELECTOR
-deployment.extensions/rook-ceph-tools   1         1         1            1           11s       rook-ceph-tools   rook/ceph:master   app=rook-ceph-tools
-
-NAME                                   READY     STATUS    RESTARTS   AGE       IP               NODE
-pod/rook-ceph-tools-76c7d559b6-qth8c   1/1       Running   0          11s       192.168.250.12   pruzicka-k8s-istio-demo-node02
+TODO xxxxxxxxx
 ```
 
 Create a storage class based on the Ceph RBD volume plugin:
@@ -342,7 +300,7 @@ Create a storage class based on the Ceph RBD volume plugin:
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/storageclass.yaml
 # Give Ceph some time to create pool...
-sleep 20
+sleep 10
 ```
 
 Set `rook-ceph-block` as default Storage Class:
@@ -611,7 +569,7 @@ Install ElasticSearch operator:
 
 ```bash
 helm install --wait --name elasticsearch-operator es-operator/elasticsearch-operator --set rbac.enabled=True --namespace es-operator
-sleep 30
+sleep 50
 ```
 
 Check how the operator looks like:
@@ -637,8 +595,8 @@ helm install --wait --name=elasticsearch --namespace logging es-operator/elastic
   --set kibana.enabled=true \
   --set cerebro.enabled=true \
   --set storage.class=rook-ceph-block \
-  --set clientReplicas=3,masterReplicas=3,dataReplicas=3
-sleep 700
+  --set clientReplicas=1,masterReplicas=1,dataReplicas=1
+sleep 500
 ```
 
 Show ElasticSearch components:
@@ -780,7 +738,7 @@ cd istio*
 Install Istio using Helm:
 
 ```bash
-helm install --wait --timeout 2500 --name istio --namespace istio-system install/kubernetes/helm/istio \
+helm install --wait --name istio --namespace istio-system install/kubernetes/helm/istio \
   --set gateways.istio-ingressgateway.type=NodePort \
   --set gateways.istio-egressgateway.type=NodePort \
   --set grafana.enabled=true \
@@ -935,7 +893,7 @@ Deploy the demo of [Bookinfo](https://istio.io/docs/examples/bookinfo/) applicat
 
 ```bash
 kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
-sleep 200
+sleep 300
 ```
 
 Confirm all services and pods are correctly defined and running:
@@ -986,7 +944,7 @@ Define the ingress gateway for the application:
 ```bash
 cat samples/bookinfo/networking/bookinfo-gateway.yaml
 kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
-sleep 5
+sleep 10
 ```
 
 Confirm the gateway has been created:

@@ -1,55 +1,9 @@
-image: ubuntu1804
+# Not working because test VMs had problems with network connectivity and I saw many i/o timeouts, DNS resolution errors, etc...
+image: ubuntu1604
 
-stack: node 8
+stack: node 8, docker
 
 install:
+  # - export APPVEYOR_SSH_BLOCK=true
   - curl -sflL 'https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-ssh.sh' | bash -e -
-  - export KUBERNETES_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)
-  - sudo apt install -qq -y jq siege socat
-  # Install Terraform
-  - export TERRAFORM_LATEST_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')
-  - curl --silent --location https://releases.hashicorp.com/terraform/${TERRAFORM_LATEST_VERSION}/terraform_${TERRAFORM_LATEST_VERSION}_linux_amd64.zip --output /tmp/terraform_linux_amd64.zip
-  - sudo unzip -o /tmp/terraform_linux_amd64.zip -d /usr/local/bin/
-  # Install markdownlint and markdown-link-check
-  - npm install -g markdownlint-cli markdown-link-check
-  # Generate ssh key if needed
-  - test -f $HOME/.ssh/id_rsa || ( install -m 0700 -d $HOME/.ssh && ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N "" )
-  # Make root mounted as rshared to fix kube-dns issues.
-  - sudo mount --make-rshared /
-  # Download kubectl, which is a requirement for using minikube.
-  - curl -Lo kubectl https://storage.googleapis.com/kubernetes-release/release/${KUBERNETES_VERSION}/bin/linux/amd64/kubectl && chmod +x kubectl && sudo mv kubectl /usr/local/bin/
-  # Download minikube.
-  - curl -Lo minikube https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64 && chmod +x minikube && sudo mv minikube /usr/local/bin/
-  # Star minikube.
-  - |
-    export CHANGE_MINIKUBE_NONE_USER=true
-    sudo --preserve-env minikube start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=${KUBERNETES_VERSION}
-  # Fix the kubectl context, as it's often stale.
-  - minikube update-context
-  # Wait for Kubernetes to be up and ready.
-  - JSONPATH='{range .items[*]}{@.metadata.name}:{range @.status.conditions[*]}{@.type}={@.status};{end}{end}'; until kubectl get nodes -o jsonpath="$JSONPATH" 2>&1 | grep -q "Ready=True"; do sleep 1; done
-
-build_script:
-  # Terraform checks
-  - |
-    cat > terraform.tfvars << EOF
-    openstack_instance_image_name  = "test"
-    openstack_password             = "test"
-    openstack_tenant_name          = "test"
-    openstack_user_domain_name     = "test"
-    openstack_user_name            = "test"
-    openstack_auth_url             = "test"
-    openstack_instance_flavor_name = "test"
-    EOF
-    terraform init     -var-file=terraform.tfvars terrafrom/openstack
-    terraform validate -var-file=terraform.tfvars terrafrom/openstack
-  # Markdown check
-  - |
-    echo '"line-length": false' > markdownlint_config.json
-    markdownlint -c markdownlint_config.json README.md
-  # Link Checks
-  - |
-    echo '{ "ignorePatterns": [ { "pattern": "^(http|https)://localhost" } ] }' > config.json
-    markdown-link-check --config config.json ./README.md
-  # k8s commands (use everything starting from Helm installation 'curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash')
-  - sed -n '/^```bash/,/^```/p' README.md | sed '/^```*/d' | sed -n '/^curl https:\/\/raw.githubusercontent.com\/helm\/helm\/master\/scripts\/get | bash/,$p' | sh -eux
+  - ./tests/ci_test.sh

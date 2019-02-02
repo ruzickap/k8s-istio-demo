@@ -1,0 +1,14 @@
+# ~/.circleci/config.yml
+
+# Not working at all - probably too old Ubuntu trusty :-(
+
+version: 2.1
+jobs:
+  build:
+    machine: true
+    steps:
+      - checkout
+      - run:
+          name: Running tests
+          command: |
+            ./tests/ci_test.sh
