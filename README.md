@@ -21,7 +21,6 @@ or just
 
 The following sections will show you how to install k8s to [OpenStack](https://www.openstack.org/) or how to use [Minikube](https://kubernetes.io/docs/setup/minikube/).
 
-
 ### Use Minikube to start the Kubernetes cluster
 
 Install Minikube if needed: [https://kubernetes.io/docs/tasks/tools/install-minikube/](https://kubernetes.io/docs/tasks/tools/install-minikube/)
@@ -38,7 +37,7 @@ Install kubernetes-client package (kubectl):
 ```bash
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
-apt-get update
+apt-get update -qq
 apt-get install -y kubectl socat
 ```
 
@@ -55,23 +54,24 @@ You can skip this part if you have [kubectl](https://kubernetes.io/docs/tasks/to
 Run Ubuntu docker image and mount the directory there:
 
 ```bash
+mkdir /tmp/test && cd /tmp/test
 docker run -it -rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $PWD:/mnt ubuntu
 ```
 
 Install necessary software into the Docker container:
 
 ```bash
-apt update
-apt install -y apt-transport-https curl firefox git gnupg jq openssh-client siege unzip vim
+apt update -qq
+apt install -y -qq apt-transport-https curl firefox git gnupg jq openssh-client siege unzip vim
 ```
 
-Install `kubernetes-client` package - `kubectl`:
+Install `kubernetes-client` package - (`kubectl`):
 
 ```bash
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
-apt-get update
-apt-get install -y kubectl
+apt-get update -qq
+apt-get install -y -qq kubectl
 ```
 
 Install [Terraform](https://www.terraform.io/):
@@ -111,12 +111,14 @@ cd k8s-istio-demo
 Modify the Terraform variable file if needed:
 
 ```bash
+OPENSTACK_PASSWORD=${OPENSTACK_PASSWORD:-default}
+
 cat > terrafrom/openstack/terraform.tfvars << EOF
 openstack_auth_url                                 = "https://ic-us.ssl.mirantis.net:5000/v3"
 openstack_instance_flavor_name                     = "compact.dbs"
 openstack_instance_image_name                      = "bionic-server-cloudimg-amd64-20190119"
 openstack_networking_subnet_dns_nameservers        = ["172.19.80.70"]
-openstack_password                                 = "password"
+openstack_password                                 = "$OPENSTACK_PASSWORD"
 openstack_tenant_name                              = "mirantis-services-team"
 openstack_user_name                                = "pruzicka"
 openstack_user_domain_name                         = "ldap_mirantis"
