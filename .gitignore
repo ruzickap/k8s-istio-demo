@@ -8,6 +8,8 @@
 *.tfvars
 # Terraform crash log
 crash.log
+# demo-magic.sh script
+demo-magic.sh
 # Temporary files
 files
 # Kubernetes kubeconfig file
