@@ -21,6 +21,27 @@ or just
 
 The following sections will show you how to install k8s to [OpenStack](https://www.openstack.org/) or how to use [Minikube](https://kubernetes.io/docs/setup/minikube/).
 
+
+### Use Minikube to start the Kubernetes cluster
+
+Install Minikube if needed: [https://kubernetes.io/docs/tasks/tools/install-minikube/](https://kubernetes.io/docs/tasks/tools/install-minikube/)
+
+Start Minikube
+
+```bash
+KUBERNETES_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt | tr -d v)
+sudo minikube start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=v${KUBERNETES_VERSION}
+```
+
+Install kubernetes-client package (kubectl):
+
+```bash
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+apt-get update
+apt-get install -y kubectl socat
+```
+
 ### Install Kubernetes to OpenStack
 
 Install k8s to Openstack using [Terraform](https://www.terraform.io/).
@@ -191,26 +212,6 @@ kube-system   pod/kube-proxy-79mx8                                         1/1  
 kube-system   pod/kube-proxy-f99q2                                         1/1     Running   0          65s    192.168.250.13   pruzicka-k8s-istio-demo-node03   <none>           <none>
 kube-system   pod/kube-proxy-w4tbd                                         1/1     Running   0          60s    192.168.250.12   pruzicka-k8s-istio-demo-node02   <none>           <none>
 kube-system   pod/kube-scheduler-pruzicka-k8s-istio-demo-node01            1/1     Running   0          78s    192.168.250.11   pruzicka-k8s-istio-demo-node01   <none>           <none>
-```
-
-### Use Minikube to start the Kubernetes cluster
-
-Install Minikube if needed: [https://kubernetes.io/docs/tasks/tools/install-minikube/](https://kubernetes.io/docs/tasks/tools/install-minikube/)
-
-Start Minikube
-
-```bash
-KUBERNETES_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt | tr -d v)
-sudo minikube start --vm-driver=none --bootstrapper=kubeadm --kubernetes-version=v${KUBERNETES_VERSION}
-```
-
-Install kubernetes-client package (kubectl):
-
-```bash
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
-apt-get update
-apt-get install -y kubectl socat
 ```
 
 ## Install Helm
