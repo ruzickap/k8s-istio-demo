@@ -4,7 +4,7 @@
 
 [GitBook version](https://ruzickap.gitbook.io/k8s-istio-demo/)
 
-Find below few commands showing basics of Istio...
+Find below few commands showing basics of [Istio](https://istio.io/)...
 
 ## Requirements
 
@@ -17,11 +17,17 @@ or just
 
 * [Docker](https://www.docker.com/)
 
-## Install Kubernetes to Opnestack VMs
+## Install Kubernetes
 
-The following sections will create VMs in openstack and install k8s into them.
+The following sections will show you how to install k8s to [OpenStack](https://www.openstack.org/) or how to use [Minikube](https://kubernetes.io/docs/setup/minikube/).
 
-### Prepare the working environment inside Docker
+### Install Kubernetes to OpenStack
+
+Install k8s to Openstack using [Terraform](https://www.terraform.io/).
+
+You will need to have [Docker](https://www.docker.com/) installed.
+
+#### Prepare the working environment inside Docker
 
 You can skip this part if you have [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), [Helm](https://helm.sh/), [Siege](https://github.com/JoeDog/siege) and [Terraform](https://www.terraform.io/) installed.
 
@@ -31,14 +37,14 @@ Run Ubuntu docker image and mount the directory there:
 docker run -it -rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix -v $PWD:/mnt ubuntu
 ```
 
-Install necessary software into the docker container:
+Install necessary software into the Docker container:
 
 ```bash
 apt update
 apt install -y apt-transport-https curl firefox git gnupg jq openssh-client siege unzip vim
 ```
 
-Install kubernetes-client package (kubectl):
+Install `kubernetes-client` package - `kubectl`:
 
 ```bash
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
@@ -47,7 +53,7 @@ apt-get update
 apt-get install -y kubectl
 ```
 
-Install Terraform...
+Install [Terraform](https://www.terraform.io/):
 
 ```bash
 TERRAFORM_LATEST_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')
@@ -61,7 +67,7 @@ Change directory to `/mnt` where the git repository is mounted:
 cd /mnt
 ```
 
-### Provision VMs in OpenStack
+#### Provision VMs in OpenStack
 
 Start 3 VMs (one master and 2 workers) where the k8s will be installed.
 
@@ -81,7 +87,7 @@ git clone https://github.com/ruzickap/k8s-istio-demo
 cd k8s-istio-demo
 ```
 
-Modify the terraform variable file if needed:
+Modify the Terraform variable file if needed:
 
 ```bash
 cat > terrafrom/openstack/terraform.tfvars << EOF
@@ -97,7 +103,7 @@ prefix                                             = "pruzicka-k8s-istio-demo"
 EOF
 ```
 
-Download terraform components:
+Download Terraform components:
 
 ```bash
 terraform init -var-file=terrafrom/openstack/terraform.tfvars terrafrom/openstack
@@ -109,7 +115,7 @@ Create VMs in OpenStack:
 terraform apply -auto-approve -var-file=terrafrom/openstack/terraform.tfvars terrafrom/openstack
 ```
 
-Show terraform output:
+Show Terraform output:
 
 ```bash
 terraform output
@@ -130,9 +136,9 @@ vms_public_ip = [
 ]
 ```
 
-At the end of the output you should see 3 IP addresses which should be accessible by ssh using your public key (`~/.ssh/id_rsa.pub`).
+At the end of the output you should see 3 IP addresses which should be accessible by ssh using your public key `~/.ssh/id_rsa.pub`.
 
-### Install k8s
+#### Install k8s to the VMs
 
 Install k8s using kubeadm to the provisioned VMs:
 
@@ -150,10 +156,10 @@ kubectl get nodes -o wide
 Output:
 
 ```shell
-NAME                             STATUS    ROLES     AGE       VERSION   EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
-pruzicka-k8s-istio-demo-node01   Ready     master    2m        v1.13.2   <none>        Ubuntu 18.04.1 LTS   4.15.0-43-generic   docker://18.6.1
-pruzicka-k8s-istio-demo-node02   Ready     <none>    1m        v1.13.2   <none>        Ubuntu 18.04.1 LTS   4.15.0-43-generic   docker://18.6.1
-pruzicka-k8s-istio-demo-node03   Ready     <none>    1m        v1.13.2   <none>        Ubuntu 18.04.1 LTS   4.15.0-43-generic   docker://18.6.1
+NAME                             STATUS   ROLES    AGE   VERSION   INTERNAL-IP      EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+pruzicka-k8s-istio-demo-node01   Ready    master   2m    v1.13.3   192.168.250.11   <none>        Ubuntu 18.04.1 LTS   4.15.0-43-generic   docker://18.6.1
+pruzicka-k8s-istio-demo-node02   Ready    <none>   45s   v1.13.3   192.168.250.12   <none>        Ubuntu 18.04.1 LTS   4.15.0-43-generic   docker://18.6.1
+pruzicka-k8s-istio-demo-node03   Ready    <none>   50s   v1.13.3   192.168.250.13   <none>        Ubuntu 18.04.1 LTS   4.15.0-43-generic   docker://18.6.1
 ```
 
 View services, deployments, and pods:
@@ -165,33 +171,33 @@ kubectl get svc,deploy,po --all-namespaces -o wide
 Output:
 
 ```shell
-NAMESPACE     NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE       SELECTOR
-default       service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP         2m        <none>
-kube-system   service/kube-dns     ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP   2m        k8s-app=kube-dns
+NAMESPACE     NAME                 TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE     SELECTOR
+default       service/kubernetes   ClusterIP   10.96.0.1    <none>        443/TCP         2m16s   <none>
+kube-system   service/kube-dns     ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP   2m11s   k8s-app=kube-dns
 
-NAMESPACE     NAME                            DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS   IMAGES                     SELECTOR
-kube-system   deployment.extensions/coredns   2         2         2            2           2m        coredns      k8s.gcr.io/coredns:1.2.6   k8s-app=kube-dns
+NAMESPACE     NAME                            READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES                     SELECTOR
+kube-system   deployment.extensions/coredns   2/2     2            2           2m11s   coredns      k8s.gcr.io/coredns:1.2.6   k8s-app=kube-dns
 
-NAMESPACE     NAME                                                         READY     STATUS    RESTARTS   AGE       IP               NODE
-kube-system   pod/coredns-86c58d9df4-fs74t                                 1/1       Running   0          2m        10.244.0.2       pruzicka-k8s-istio-demo-node01
-kube-system   pod/coredns-86c58d9df4-l5gqx                                 1/1       Running   0          2m        10.244.0.3       pruzicka-k8s-istio-demo-node01
-kube-system   pod/etcd-pruzicka-k8s-istio-demo-node01                      1/1       Running   0          1m        192.168.250.11   pruzicka-k8s-istio-demo-node01
-kube-system   pod/kube-apiserver-pruzicka-k8s-istio-demo-node01            1/1       Running   0          1m        192.168.250.11   pruzicka-k8s-istio-demo-node01
-kube-system   pod/kube-controller-manager-pruzicka-k8s-istio-demo-node01   1/1       Running   0          1m        192.168.250.11   pruzicka-k8s-istio-demo-node01
-kube-system   pod/kube-flannel-ds-amd64-22rf7                              1/1       Running   0          1m        192.168.250.12   pruzicka-k8s-istio-demo-node02
-kube-system   pod/kube-flannel-ds-amd64-fx62c                              1/1       Running   0          2m        192.168.250.11   pruzicka-k8s-istio-demo-node01
-kube-system   pod/kube-flannel-ds-amd64-kws99                              1/1       Running   0          1m        192.168.250.13   pruzicka-k8s-istio-demo-node03
-kube-system   pod/kube-proxy-8vfm2                                         1/1       Running   0          1m        192.168.250.13   pruzicka-k8s-istio-demo-node03
-kube-system   pod/kube-proxy-qmtvr                                         1/1       Running   0          1m        192.168.250.12   pruzicka-k8s-istio-demo-node02
-kube-system   pod/kube-proxy-r8hj8                                         1/1       Running   0          2m        192.168.250.11   pruzicka-k8s-istio-demo-node01
-kube-system   pod/kube-scheduler-pruzicka-k8s-istio-demo-node01            1/1       Running   0          1m        192.168.250.11   pruzicka-k8s-istio-demo-node01
+NAMESPACE     NAME                                                         READY   STATUS    RESTARTS   AGE    IP               NODE                             NOMINATED NODE   READINESS GATES
+kube-system   pod/coredns-86c58d9df4-tlmvh                                 1/1     Running   0          116s   10.244.0.2       pruzicka-k8s-istio-demo-node01   <none>           <none>
+kube-system   pod/coredns-86c58d9df4-zk685                                 1/1     Running   0          116s   10.244.0.3       pruzicka-k8s-istio-demo-node01   <none>           <none>
+kube-system   pod/etcd-pruzicka-k8s-istio-demo-node01                      1/1     Running   0          79s    192.168.250.11   pruzicka-k8s-istio-demo-node01   <none>           <none>
+kube-system   pod/kube-apiserver-pruzicka-k8s-istio-demo-node01            1/1     Running   0          72s    192.168.250.11   pruzicka-k8s-istio-demo-node01   <none>           <none>
+kube-system   pod/kube-controller-manager-pruzicka-k8s-istio-demo-node01   1/1     Running   0          65s    192.168.250.11   pruzicka-k8s-istio-demo-node01   <none>           <none>
+kube-system   pod/kube-flannel-ds-amd64-cvpfq                              1/1     Running   0          65s    192.168.250.13   pruzicka-k8s-istio-demo-node03   <none>           <none>
+kube-system   pod/kube-flannel-ds-amd64-ggqmv                              1/1     Running   0          60s    192.168.250.12   pruzicka-k8s-istio-demo-node02   <none>           <none>
+kube-system   pod/kube-flannel-ds-amd64-ql6g6                              1/1     Running   0          117s   192.168.250.11   pruzicka-k8s-istio-demo-node01   <none>           <none>
+kube-system   pod/kube-proxy-79mx8                                         1/1     Running   0          117s   192.168.250.11   pruzicka-k8s-istio-demo-node01   <none>           <none>
+kube-system   pod/kube-proxy-f99q2                                         1/1     Running   0          65s    192.168.250.13   pruzicka-k8s-istio-demo-node03   <none>           <none>
+kube-system   pod/kube-proxy-w4tbd                                         1/1     Running   0          60s    192.168.250.12   pruzicka-k8s-istio-demo-node02   <none>           <none>
+kube-system   pod/kube-scheduler-pruzicka-k8s-istio-demo-node01            1/1     Running   0          78s    192.168.250.11   pruzicka-k8s-istio-demo-node01   <none>           <none>
 ```
 
-## Use Minikube
+### Use Minikube to start the Kubernetes cluster
 
 Install Minikube if needed: [https://kubernetes.io/docs/tasks/tools/install-minikube/](https://kubernetes.io/docs/tasks/tools/install-minikube/)
 
-Start minikube
+Start Minikube
 
 ```bash
 KUBERNETES_VERSION=$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt | tr -d v)
@@ -209,13 +215,13 @@ apt-get install -y kubectl socat
 
 ## Install Helm
 
-Install Helm binary locally:
+Install [Helm](https://helm.sh/) binary locally:
 
 ```bash
 curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
 ```
 
-Install Tiller (the Helm server-side component) into the Kubernetes Cluster:
+Install Tiller (the Helm server-side component) into the Kubernetes cluster:
 
 ```bash
 kubectl create serviceaccount tiller --namespace kube-system
@@ -233,13 +239,13 @@ kubectl get pods -l app=helm --all-namespaces
 Output:
 
 ```shell
-NAMESPACE     NAME                            READY     STATUS    RESTARTS   AGE
-kube-system   tiller-deploy-dbb85cb99-hhxrt   1/1       Running   0          35s
+NAMESPACE     NAME                            READY   STATUS    RESTARTS   AGE
+kube-system   tiller-deploy-dbb85cb99-z4c47   1/1     Running   0          28s
 ```
 
 ## Instal Rook
 
-Install Rook Operator (Ceph storage for k8s):
+Install [Rook](https://rook.io/) Operator ([Ceph](https://ceph.com/) storage for k8s):
 
 ```bash
 helm repo add rook-stable https://charts.rook.io/stable
@@ -256,17 +262,17 @@ kubectl get svc,deploy,po --namespace=rook-ceph-system -o wide
 Output:
 
 ```shell
-NAME                                       DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS           IMAGES             SELECTOR
-deployment.extensions/rook-ceph-operator   1         1         1            1           2m        rook-ceph-operator   rook/ceph:v0.9.2   app=rook-ceph-operator
+NAME                                       READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS           IMAGES             SELECTOR
+deployment.extensions/rook-ceph-operator   1/1     1            1           3m36s   rook-ceph-operator   rook/ceph:v0.9.2   app=rook-ceph-operator
 
-NAME                                      READY     STATUS    RESTARTS   AGE       IP               NODE
-pod/rook-ceph-agent-7kkdn                 1/1       Running   0          1m        192.168.250.13   pruzicka-k8s-istio-demo-node03
-pod/rook-ceph-agent-bbkvn                 1/1       Running   0          1m        192.168.250.12   pruzicka-k8s-istio-demo-node02
-pod/rook-ceph-agent-mlbpf                 1/1       Running   0          1m        192.168.250.11   pruzicka-k8s-istio-demo-node01
-pod/rook-ceph-operator-7478c899b5-bpvt7   1/1       Running   0          2m        10.244.2.2       pruzicka-k8s-istio-demo-node03
-pod/rook-discover-58bfz                   1/1       Running   0          1m        10.244.0.4       pruzicka-k8s-istio-demo-node01
-pod/rook-discover-mhbgb                   1/1       Running   0          1m        10.244.2.3       pruzicka-k8s-istio-demo-node03
-pod/rook-discover-ndblh                   1/1       Running   0          1m        10.244.1.3       pruzicka-k8s-istio-demo-node02
+NAME                                      READY   STATUS    RESTARTS   AGE     IP               NODE                             NOMINATED NODE   READINESS GATES
+pod/rook-ceph-agent-2bxhq                 1/1     Running   0          2m14s   192.168.250.12   pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/rook-ceph-agent-8h4p4                 1/1     Running   0          2m14s   192.168.250.11   pruzicka-k8s-istio-demo-node01   <none>           <none>
+pod/rook-ceph-agent-mq69r                 1/1     Running   0          2m14s   192.168.250.13   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/rook-ceph-operator-7478c899b5-px2hc   1/1     Running   0          3m37s   10.244.2.3       pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/rook-discover-8ffj8                   1/1     Running   0          2m14s   10.244.2.4       pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/rook-discover-l56jj                   1/1     Running   0          2m14s   10.244.1.2       pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/rook-discover-q9xwp                   1/1     Running   0          2m14s   10.244.0.4       pruzicka-k8s-istio-demo-node01   <none>           <none>
 ```
 
 Create your Rook cluster:
@@ -276,7 +282,7 @@ kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/exa
 sleep 50
 ```
 
-Get the Toolbox with ceph commands:
+Get the [Toolbox](https://rook.io/docs/rook/master/ceph-toolbox.html) with ceph commands:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/toolbox.yaml
@@ -292,7 +298,35 @@ kubectl get svc,deploy,po --namespace=rook-ceph -o wide
 Output:
 
 ```shell
-TODO xxxxxxxxx
+NAME                              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE     SELECTOR
+service/rook-ceph-mgr             ClusterIP   10.103.36.128   <none>        9283/TCP   8m45s   app=rook-ceph-mgr,rook_cluster=rook-ceph
+service/rook-ceph-mgr-dashboard   ClusterIP   10.99.173.58    <none>        8443/TCP   8m45s   app=rook-ceph-mgr,rook_cluster=rook-ceph
+service/rook-ceph-mon-a           ClusterIP   10.102.39.160   <none>        6790/TCP   12m     app=rook-ceph-mon,ceph_daemon_id=a,mon=a,mon_cluster=rook-ceph,rook_cluster=rook-ceph
+service/rook-ceph-mon-b           ClusterIP   10.102.49.137   <none>        6790/TCP   11m     app=rook-ceph-mon,ceph_daemon_id=b,mon=b,mon_cluster=rook-ceph,rook_cluster=rook-ceph
+service/rook-ceph-mon-c           ClusterIP   10.96.25.143    <none>        6790/TCP   10m     app=rook-ceph-mon,ceph_daemon_id=c,mon=c,mon_cluster=rook-ceph,rook_cluster=rook-ceph
+
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS        IMAGES             SELECTOR
+deployment.extensions/rook-ceph-mgr-a   1/1     1            1           9m33s   mgr               ceph/ceph:v13      app=rook-ceph-mgr,ceph_daemon_id=a,instance=a,mgr=a,rook_cluster=rook-ceph
+deployment.extensions/rook-ceph-mon-a   1/1     1            1           12m     mon               ceph/ceph:v13      app=rook-ceph-mon,ceph_daemon_id=a,mon=a,mon_cluster=rook-ceph,rook_cluster=rook-ceph
+deployment.extensions/rook-ceph-mon-b   1/1     1            1           11m     mon               ceph/ceph:v13      app=rook-ceph-mon,ceph_daemon_id=b,mon=b,mon_cluster=rook-ceph,rook_cluster=rook-ceph
+deployment.extensions/rook-ceph-mon-c   1/1     1            1           10m     mon               ceph/ceph:v13      app=rook-ceph-mon,ceph_daemon_id=c,mon=c,mon_cluster=rook-ceph,rook_cluster=rook-ceph
+deployment.extensions/rook-ceph-osd-0   1/1     1            1           8m34s   osd               ceph/ceph:v13      app=rook-ceph-osd,ceph-osd-id=0,rook_cluster=rook-ceph
+deployment.extensions/rook-ceph-osd-1   1/1     1            1           8m33s   osd               ceph/ceph:v13      app=rook-ceph-osd,ceph-osd-id=1,rook_cluster=rook-ceph
+deployment.extensions/rook-ceph-osd-2   1/1     1            1           8m33s   osd               ceph/ceph:v13      app=rook-ceph-osd,ceph-osd-id=2,rook_cluster=rook-ceph
+deployment.extensions/rook-ceph-tools   1/1     1            1           12m     rook-ceph-tools   rook/ceph:master   app=rook-ceph-tools
+
+NAME                                                             READY   STATUS      RESTARTS   AGE     IP               NODE                             NOMINATED NODE   READINESS GATES
+pod/rook-ceph-mgr-a-669f5b47fc-sjvrr                             1/1     Running     0          9m33s   10.244.1.6       pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/rook-ceph-mon-a-784f8fb5b6-zcvjr                             1/1     Running     0          12m     10.244.0.5       pruzicka-k8s-istio-demo-node01   <none>           <none>
+pod/rook-ceph-mon-b-6dfbf486f4-2ktpm                             1/1     Running     0          11m     10.244.2.5       pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/rook-ceph-mon-c-6c85f6f44-j5wwv                              1/1     Running     0          10m     10.244.1.5       pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/rook-ceph-osd-0-6dd9cdc946-7th52                             1/1     Running     0          8m34s   10.244.1.8       pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/rook-ceph-osd-1-64cdd77897-9vdrh                             1/1     Running     0          8m33s   10.244.2.7       pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/rook-ceph-osd-2-67fcc446bd-skq52                             1/1     Running     0          8m33s   10.244.0.7       pruzicka-k8s-istio-demo-node01   <none>           <none>
+pod/rook-ceph-osd-prepare-pruzicka-k8s-istio-demo-node01-z29hj   0/2     Completed   0          8m39s   10.244.0.6       pruzicka-k8s-istio-demo-node01   <none>           <none>
+pod/rook-ceph-osd-prepare-pruzicka-k8s-istio-demo-node02-q8xqx   0/2     Completed   0          8m39s   10.244.2.6       pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/rook-ceph-osd-prepare-pruzicka-k8s-istio-demo-node03-vbwxv   0/2     Completed   0          8m39s   10.244.1.7       pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/rook-ceph-tools-76c7d559b6-s6s4l                             1/1     Running     0          12m     192.168.250.12   pruzicka-k8s-istio-demo-node02   <none>           <none>
 ```
 
 Create a storage class based on the Ceph RBD volume plugin:
@@ -346,11 +380,11 @@ Annotations:  <none>
 API Version:  ceph.rook.io/v1
 Kind:         CephBlockPool
 Metadata:
-  Creation Timestamp:  2019-01-29T09:48:18Z
+  Creation Timestamp:  2019-02-04T09:51:55Z
   Generation:          1
-  Resource Version:    2160
+  Resource Version:    3171
   Self Link:           /apis/ceph.rook.io/v1/namespaces/rook-ceph/cephblockpools/replicapool
-  UID:                 01ce3c4d-23ab-11e9-8a8d-fa163e64621e
+  UID:                 8163367d-2862-11e9-a470-fa163e90237a
 Spec:
   Replicated:
     Size:  1
@@ -367,11 +401,11 @@ Output:
 
 ```shell
   cluster:
-    id:     e8a42625-f69c-441f-9895-21a19615da54
+    id:     1f4458a6-f574-4e6c-8a25-5a5eef6eb0a7
     health: HEALTH_OK
 
   services:
-    mon: 3 daemons, quorum c,b,a
+    mon: 3 daemons, quorum c,a,b
     mgr: a(active)
     osd: 3 osds: 3 up, 3 in
 
@@ -394,9 +428,9 @@ Output:
 +----+--------------------------------+-------+-------+--------+---------+--------+---------+-----------+
 | id |              host              |  used | avail | wr ops | wr data | rd ops | rd data |   state   |
 +----+--------------------------------+-------+-------+--------+---------+--------+---------+-----------+
-| 0  | pruzicka-k8s-istio-demo-node02 | 4437M | 14.8G |    0   |     0   |    0   |     0   | exists,up |
-| 1  | pruzicka-k8s-istio-demo-node01 | 4931M | 14.3G |    0   |     0   |    0   |     0   | exists,up |
-| 2  | pruzicka-k8s-istio-demo-node03 | 4285M | 15.0G |    0   |     0   |    0   |     0   | exists,up |
+| 0  | pruzicka-k8s-istio-demo-node03 | 4302M | 15.0G |    0   |     0   |    0   |     0   | exists,up |
+| 1  | pruzicka-k8s-istio-demo-node02 | 4455M | 14.8G |    0   |     0   |    0   |     0   | exists,up |
+| 2  | pruzicka-k8s-istio-demo-node01 | 4948M | 14.3G |    0   |     0   |    0   |     0   | exists,up |
 +----+--------------------------------+-------+-------+--------+---------+--------+---------+-----------+
 ```
 
@@ -427,14 +461,14 @@ kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools
 Output:
 
 ```shell
-epoch 3
-fsid e8a42625-f69c-441f-9895-21a19615da54
-last_changed 2019-01-29 09:45:03.380133
-created 2019-01-29 09:43:53.046981
-0: 10.96.51.185:6790/0 mon.c
-1: 10.103.75.150:6790/0 mon.b
-2: 10.109.40.168:6790/0 mon.a
 dumped monmap epoch 3
+epoch 3
+fsid 1f4458a6-f574-4e6c-8a25-5a5eef6eb0a7
+last_changed 2019-02-04 09:41:39.772112
+created 2019-02-04 09:40:08.865074
+0: 10.96.25.143:6790/0 mon.c
+1: 10.102.39.160:6790/0 mon.a
+2: 10.102.49.137:6790/0 mon.b
 ```
 
 Check the cluster usage status:
@@ -448,7 +482,7 @@ Output:
 ```shell
 GLOBAL:
     SIZE       AVAIL      RAW USED     %RAW USED
-    58 GiB     44 GiB       13 GiB         23.13
+    58 GiB     44 GiB       13 GiB         23.22
 POOLS:
     NAME            ID     USED     %USED     MAX AVAIL     OBJECTS
     replicapool     1       0 B         0        40 GiB           0
@@ -464,10 +498,10 @@ Output:
 
 ```shell
 ID CLASS WEIGHT  REWEIGHT SIZE   USE     AVAIL  %USE  VAR  PGS
- 1   hdd 0.01880  1.00000 19 GiB 4.8 GiB 14 GiB 25.07 1.08  32
- 0   hdd 0.01880  1.00000 19 GiB 4.3 GiB 15 GiB 22.56 0.97  32
- 2   hdd 0.01880  1.00000 19 GiB 4.2 GiB 15 GiB 21.78 0.94  36
-                    TOTAL 58 GiB  13 GiB 44 GiB 23.13
+ 2   hdd 0.01880  1.00000 19 GiB 4.8 GiB 14 GiB 25.15 1.08  36
+ 1   hdd 0.01880  1.00000 19 GiB 4.4 GiB 15 GiB 22.65 0.98  32
+ 0   hdd 0.01880  1.00000 19 GiB 4.2 GiB 15 GiB 21.87 0.94  32
+                    TOTAL 58 GiB  13 GiB 44 GiB 23.22
 MIN/MAX VAR: 0.94/1.08  STDDEV: 1.40
 ```
 
@@ -480,7 +514,7 @@ kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools
 Output:
 
 ```shell
-e3: 3 mons at {a=10.109.40.168:6790/0,b=10.103.75.150:6790/0,c=10.96.51.185:6790/0}, election epoch 16, leader 0 c, quorum 0,1,2 c,b,a
+e3: 3 mons at {a=10.102.39.160:6790/0,b=10.102.49.137:6790/0,c=10.96.25.143:6790/0}, election epoch 14, leader 0 c, quorum 0,1,2 c,a,b
 ```
 
 Check OSD stats:
@@ -543,12 +577,12 @@ Output:
 ```shell
 ID CLASS WEIGHT  TYPE NAME                               STATUS REWEIGHT PRI-AFF
 -1       0.05640 root default
--3       0.01880     host pruzicka-k8s-istio-demo-node01
- 1   hdd 0.01880         osd.1                               up  1.00000 1.00000
--2       0.01880     host pruzicka-k8s-istio-demo-node02
- 0   hdd 0.01880         osd.0                               up  1.00000 1.00000
--4       0.01880     host pruzicka-k8s-istio-demo-node03
+-4       0.01880     host pruzicka-k8s-istio-demo-node01
  2   hdd 0.01880         osd.2                               up  1.00000 1.00000
+-3       0.01880     host pruzicka-k8s-istio-demo-node02
+ 1   hdd 0.01880         osd.1                               up  1.00000 1.00000
+-2       0.01880     host pruzicka-k8s-istio-demo-node03
+ 0   hdd 0.01880         osd.0                               up  1.00000 1.00000
 ```
 
 List the cluster authentication keys:
@@ -559,7 +593,7 @@ kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools
 
 ## Install ElasticSearch, Kibana, Fluentbit
 
-Add ElasticSearch operator to Helm:
+Add [ElasticSearch operator](https://github.com/upmc-enterprises/elasticsearch-operator) to Helm:
 
 ```bash
 helm repo add es-operator https://raw.githubusercontent.com/upmc-enterprises/elasticsearch-operator/master/charts/
@@ -581,11 +615,11 @@ kubectl get svc,deploy,po --namespace=es-operator -o wide
 Output:
 
 ```shell
-NAME                                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS               IMAGES                                          SELECTOR
-deployment.extensions/elasticsearch-operator   1         1         1            0           32s       elasticsearch-operator   upmcenterprises/elasticsearch-operator:0.0.12   name=elasticsearch-operator,release=elasticsearch-operator
+NAME                                           READY   UP-TO-DATE   AVAILABLE   AGE    CONTAINERS               IMAGES                                          SELECTOR
+deployment.extensions/elasticsearch-operator   1/1     1            1           106s   elasticsearch-operator   upmcenterprises/elasticsearch-operator:0.0.12   name=elasticsearch-operator,release=elasticsearch-operator
 
-NAME                                          READY     STATUS    RESTARTS   AGE       IP           NODE
-pod/elasticsearch-operator-5dc59b8cc5-hq9hg   0/1       Running   0          32s       10.244.2.8   pruzicka-k8s-istio-demo-node03
+NAME                                          READY   STATUS    RESTARTS   AGE    IP           NODE                             NOMINATED NODE   READINESS GATES
+pod/elasticsearch-operator-5dc59b8cc5-6946l   1/1     Running   0          106s   10.244.1.9   pruzicka-k8s-istio-demo-node03   <none>           <none>
 ```
 
 Install ElasticSearch cluster:
@@ -602,60 +636,40 @@ sleep 500
 Show ElasticSearch components:
 
 ```bash
-kubectl get svc,deploy,po,pvc --namespace=logging -o wide
+kubectl get svc,deploy,po,pvc,elasticsearchclusters --namespace=logging -o wide
 ```
 
 Output:
 
 ```shell
-NAME                                                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE       SELECTOR
-service/cerebro-elasticsearch-cluster                   ClusterIP   10.108.166.166   <none>        80/TCP     6m        role=cerebro
-service/elasticsearch-discovery-elasticsearch-cluster   ClusterIP   10.106.183.114   <none>        9300/TCP   6m        component=elasticsearch-elasticsearch-cluster,role=master
-service/elasticsearch-elasticsearch-cluster             ClusterIP   10.100.7.189     <none>        9200/TCP   6m        component=elasticsearch-elasticsearch-cluster,role=client
-service/es-data-svc-elasticsearch-cluster               ClusterIP   10.107.68.98     <none>        9300/TCP   6m        component=elasticsearch-elasticsearch-cluster,role=data
-service/kibana-elasticsearch-cluster                    ClusterIP   10.96.44.25      <none>        80/TCP     6m        role=kibana
+NAME                                                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE   SELECTOR
+service/cerebro-elasticsearch-cluster                   ClusterIP   10.105.197.151   <none>        80/TCP     18m   role=cerebro
+service/elasticsearch-discovery-elasticsearch-cluster   ClusterIP   10.111.76.241    <none>        9300/TCP   18m   component=elasticsearch-elasticsearch-cluster,role=master
+service/elasticsearch-elasticsearch-cluster             ClusterIP   10.104.103.49    <none>        9200/TCP   18m   component=elasticsearch-elasticsearch-cluster,role=client
+service/es-data-svc-elasticsearch-cluster               ClusterIP   10.98.179.244    <none>        9300/TCP   18m   component=elasticsearch-elasticsearch-cluster,role=data
+service/kibana-elasticsearch-cluster                    ClusterIP   10.110.19.242    <none>        80/TCP     18m   role=kibana
 
-NAME                                                    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS                        IMAGES                                                    SELECTOR
-deployment.extensions/cerebro-elasticsearch-cluster     1         1         1            1           6m        cerebro-elasticsearch-cluster     upmcenterprises/cerebro:0.6.8                             component=elasticsearch-elasticsearch-cluster,name=cerebro-elasticsearch-cluster,role=cerebro
-deployment.extensions/es-client-elasticsearch-cluster   3         3         3            3           6m        es-client-elasticsearch-cluster   upmcenterprises/docker-elasticsearch-kubernetes:6.1.3_0   cluster=elasticsearch-cluster,component=elasticsearch-elasticsearch-cluster,name=es-client-elasticsearch-cluster,role=client
-deployment.extensions/kibana-elasticsearch-cluster      1         1         1            1           6m        kibana-elasticsearch-cluster      docker.elastic.co/kibana/kibana-oss:6.1.3                 component=elasticsearch-elasticsearch-cluster,name=kibana-elasticsearch-cluster,role=kibana
+NAME                                                    READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS                        IMAGES                                                    SELECTOR
+deployment.extensions/cerebro-elasticsearch-cluster     1/1     1            1           18m   cerebro-elasticsearch-cluster     upmcenterprises/cerebro:0.6.8                             component=elasticsearch-elasticsearch-cluster,name=cerebro-elasticsearch-cluster,role=cerebro
+deployment.extensions/es-client-elasticsearch-cluster   1/1     1            1           18m   es-client-elasticsearch-cluster   upmcenterprises/docker-elasticsearch-kubernetes:6.1.3_0   cluster=elasticsearch-cluster,component=elasticsearch-elasticsearch-cluster,name=es-client-elasticsearch-cluster,role=client
+deployment.extensions/kibana-elasticsearch-cluster      1/1     1            1           18m   kibana-elasticsearch-cluster      docker.elastic.co/kibana/kibana-oss:6.1.3                 component=elasticsearch-elasticsearch-cluster,name=kibana-elasticsearch-cluster,role=kibana
 
-NAME                                                    READY     STATUS    RESTARTS   AGE       IP            NODE
-pod/cerebro-elasticsearch-cluster-64888cf977-8cj5q      1/1       Running   0          6m        10.244.1.11   pruzicka-k8s-istio-demo-node02
-pod/es-client-elasticsearch-cluster-8d9df64b7-4684l     1/1       Running   0          6m        10.244.2.10   pruzicka-k8s-istio-demo-node03
-pod/es-client-elasticsearch-cluster-8d9df64b7-dfcpx     1/1       Running   0          6m        10.244.0.9    pruzicka-k8s-istio-demo-node01
-pod/es-client-elasticsearch-cluster-8d9df64b7-tpm55     1/1       Running   0          6m        10.244.1.10   pruzicka-k8s-istio-demo-node02
-pod/es-data-elasticsearch-cluster-rook-ceph-block-0     1/1       Running   0          6m        10.244.1.12   pruzicka-k8s-istio-demo-node02
-pod/es-data-elasticsearch-cluster-rook-ceph-block-1     1/1       Running   0          3m        10.244.0.10   pruzicka-k8s-istio-demo-node01
-pod/es-data-elasticsearch-cluster-rook-ceph-block-2     1/1       Running   0          3m        10.244.2.13   pruzicka-k8s-istio-demo-node03
-pod/es-master-elasticsearch-cluster-rook-ceph-block-0   1/1       Running   0          6m        10.244.2.12   pruzicka-k8s-istio-demo-node03
-pod/es-master-elasticsearch-cluster-rook-ceph-block-1   1/1       Running   0          1m        10.244.1.13   pruzicka-k8s-istio-demo-node02
-pod/es-master-elasticsearch-cluster-rook-ceph-block-2   1/1       Running   0          1m        10.244.0.11   pruzicka-k8s-istio-demo-node01
-pod/kibana-elasticsearch-cluster-7fb7f88f55-xk76r       1/1       Running   0          6m        10.244.2.11   pruzicka-k8s-istio-demo-node03
+NAME                                                    READY   STATUS    RESTARTS   AGE   IP            NODE                             NOMINATED NODE   READINESS GATES
+pod/cerebro-elasticsearch-cluster-64888cf977-dgb8g      1/1     Running   0          18m   10.244.0.9    pruzicka-k8s-istio-demo-node01   <none>           <none>
+pod/es-client-elasticsearch-cluster-8d9df64b7-tvl8z     1/1     Running   0          18m   10.244.1.11   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/es-data-elasticsearch-cluster-rook-ceph-block-0     1/1     Running   0          18m   10.244.2.11   pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/es-master-elasticsearch-cluster-rook-ceph-block-0   1/1     Running   0          18m   10.244.2.10   pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/kibana-elasticsearch-cluster-7fb7f88f55-6sl6j       1/1     Running   0          18m   10.244.2.9    pruzicka-k8s-istio-demo-node02   <none>           <none>
 
-NAME                                                                              STATUS    VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
-persistentvolumeclaim/es-data-es-data-elasticsearch-cluster-rook-ceph-block-0     Bound     pvc-c4e4e5ef-23ab-11e9-8a8d-fa163e64621e   1Gi        RWO            rook-ceph-block   6m
-persistentvolumeclaim/es-data-es-data-elasticsearch-cluster-rook-ceph-block-1     Bound     pvc-1c1a3b14-23ac-11e9-8a8d-fa163e64621e   1Gi        RWO            rook-ceph-block   3m
-persistentvolumeclaim/es-data-es-data-elasticsearch-cluster-rook-ceph-block-2     Bound     pvc-393aabf9-23ac-11e9-8a8d-fa163e64621e   1Gi        RWO            rook-ceph-block   3m
-persistentvolumeclaim/es-data-es-master-elasticsearch-cluster-rook-ceph-block-0   Bound     pvc-c4c97a1a-23ab-11e9-8a8d-fa163e64621e   1Gi        RWO            rook-ceph-block   6m
-persistentvolumeclaim/es-data-es-master-elasticsearch-cluster-rook-ceph-block-1   Bound     pvc-731f9ca5-23ac-11e9-8a8d-fa163e64621e   1Gi        RWO            rook-ceph-block   1m
-persistentvolumeclaim/es-data-es-master-elasticsearch-cluster-rook-ceph-block-2   Bound     pvc-82448ea7-23ac-11e9-8a8d-fa163e64621e   1Gi        RWO            rook-ceph-block   1m
+NAME                                                                              STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS      AGE
+persistentvolumeclaim/es-data-es-data-elasticsearch-cluster-rook-ceph-block-0     Bound    pvc-870ad81a-2863-11e9-a470-fa163e90237a   1Gi        RWO            rook-ceph-block   18m
+persistentvolumeclaim/es-data-es-master-elasticsearch-cluster-rook-ceph-block-0   Bound    pvc-86fcb9ce-2863-11e9-a470-fa163e90237a   1Gi        RWO            rook-ceph-block   18m
+
+NAME                                                              AGE
+elasticsearchcluster.enterprises.upmc.com/elasticsearch-cluster   18m
 ```
 
-List provisioned ElasticSearch clusters:
-
-```bash
-kubectl get elasticsearchclusters --all-namespaces
-```
-
-Output:
-
-```shell
-NAMESPACE   NAME                    AGE
-logging     elasticsearch-cluster   7m
-```
-
-Install Fluentbit:
+Install [Fluentbit](https://fluentbit.io/):
 
 ```bash
 helm install --wait stable/fluent-bit --name=fluent-bit --namespace=logging \
@@ -688,13 +702,13 @@ kubectl get -l app=fluent-bit svc,pods --all-namespaces -o wide
 Output:
 
 ```shell
-NAMESPACE   NAME                                    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE       SELECTOR
-logging     service/fluent-bit-fluent-bit-metrics   ClusterIP   10.110.236.121   <none>        2020/TCP   7h        app=fluent-bit,release=fluent-bit
+NAMESPACE   NAME                                    TYPE        CLUSTER-IP     EXTERNAL-IP   PORT(S)    AGE   SELECTOR
+logging     service/fluent-bit-fluent-bit-metrics   ClusterIP   10.97.33.162   <none>        2020/TCP   80s   app=fluent-bit,release=fluent-bit
 
-NAMESPACE   NAME                              READY     STATUS    RESTARTS   AGE       IP            NODE
-logging     pod/fluent-bit-fluent-bit-dcg4s   1/1       Running   0          7h        10.244.1.15   pruzicka-k8s-istio-demo-node03
-logging     pod/fluent-bit-fluent-bit-tfqdb   1/1       Running   0          7h        10.244.0.11   pruzicka-k8s-istio-demo-node01
-logging     pod/fluent-bit-fluent-bit-tnxj2   1/1       Running   0          7h        10.244.2.13   pruzicka-k8s-istio-demo-node02
+NAMESPACE   NAME                              READY   STATUS    RESTARTS   AGE   IP            NODE                             NOMINATED NODE   READINESS GATES
+logging     pod/fluent-bit-fluent-bit-426ph   1/1     Running   0          80s   10.244.0.10   pruzicka-k8s-istio-demo-node01   <none>           <none>
+logging     pod/fluent-bit-fluent-bit-c6tbx   1/1     Running   0          80s   10.244.1.12   pruzicka-k8s-istio-demo-node03   <none>           <none>
+logging     pod/fluent-bit-fluent-bit-zfkqr   1/1     Running   0          80s   10.244.2.12   pruzicka-k8s-istio-demo-node02   <none>           <none>
 ```
 
 ## Istio Architecture
@@ -735,7 +749,7 @@ Change the directory to the Istio installation files location:
 cd istio*
 ```
 
-Install Istio using Helm:
+Install [Istio](https://istio.io/) using Helm:
 
 ```bash
 helm install --wait --name istio --namespace istio-system install/kubernetes/helm/istio \
@@ -760,55 +774,55 @@ kubectl get --namespace=istio-system svc,deployment,pods -o wide
 Output:
 
 ```shell
-NAME                             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                                                                                                                   AGE       SELECTOR
-service/grafana                  ClusterIP   10.106.150.213   <none>        3000/TCP                                                                                                                  12m       app=grafana
-service/istio-citadel            ClusterIP   10.96.179.146    <none>        8060/TCP,9093/TCP                                                                                                         12m       istio=citadel
-service/istio-egressgateway      NodePort    10.103.222.60    <none>        80:32096/TCP,443:31941/TCP                                                                                                12m       app=istio-egressgateway,istio=egressgateway
-service/istio-galley             ClusterIP   10.96.254.151    <none>        443/TCP,9093/TCP                                                                                                          12m       istio=galley
-service/istio-ingressgateway     NodePort    10.110.96.100    <none>        80:31380/TCP,443:31390/TCP,31400:31400/TCP,15011:30425/TCP,8060:31127/TCP,853:32621/TCP,15030:30835/TCP,15031:32123/TCP   12m       app=istio-ingressgateway,istio=ingressgateway
-service/istio-pilot              ClusterIP   10.110.95.231    <none>        15010/TCP,15011/TCP,8080/TCP,9093/TCP                                                                                     12m       istio=pilot
-service/istio-policy             ClusterIP   10.106.16.125    <none>        9091/TCP,15004/TCP,9093/TCP                                                                                               12m       istio-mixer-type=policy,istio=mixer
-service/istio-sidecar-injector   ClusterIP   10.104.200.156   <none>        443/TCP                                                                                                                   12m       istio=sidecar-injector
-service/istio-telemetry          ClusterIP   10.101.139.163   <none>        9091/TCP,15004/TCP,9093/TCP,42422/TCP                                                                                     12m       istio-mixer-type=telemetry,istio=mixer
-service/jaeger-agent             ClusterIP   None             <none>        5775/UDP,6831/UDP,6832/UDP                                                                                                12m       app=jaeger
-service/jaeger-collector         ClusterIP   10.100.202.77    <none>        14267/TCP,14268/TCP                                                                                                       12m       app=jaeger
-service/jaeger-query             ClusterIP   10.110.237.230   <none>        16686/TCP                                                                                                                 12m       app=jaeger
-service/kiali                    ClusterIP   10.110.159.171   <none>        20001/TCP                                                                                                                 12m       app=kiali
-service/prometheus               ClusterIP   10.109.4.73      <none>        9090/TCP                                                                                                                  12m       app=prometheus
-service/servicegraph             ClusterIP   10.97.113.249    <none>        8088/TCP                                                                                                                  12m       app=servicegraph
-service/tracing                  ClusterIP   10.96.21.32      <none>        80/TCP                                                                                                                    12m       app=jaeger
-service/zipkin                   ClusterIP   10.111.24.171    <none>        9411/TCP                                                                                                                  12m       app=jaeger
+NAME                             TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                                                                                                                   AGE   SELECTOR
+service/grafana                  ClusterIP   10.101.117.126   <none>        3000/TCP                                                                                                                  15m   app=grafana
+service/istio-citadel            ClusterIP   10.99.235.151    <none>        8060/TCP,9093/TCP                                                                                                         15m   istio=citadel
+service/istio-egressgateway      NodePort    10.105.213.174   <none>        80:31610/TCP,443:31811/TCP                                                                                                15m   app=istio-egressgateway,istio=egressgateway
+service/istio-galley             ClusterIP   10.110.154.0     <none>        443/TCP,9093/TCP                                                                                                          15m   istio=galley
+service/istio-ingressgateway     NodePort    10.101.212.170   <none>        80:31380/TCP,443:31390/TCP,31400:31400/TCP,15011:31814/TCP,8060:31435/TCP,853:31471/TCP,15030:30210/TCP,15031:30498/TCP   15m   app=istio-ingressgateway,istio=ingressgateway
+service/istio-pilot              ClusterIP   10.96.34.157     <none>        15010/TCP,15011/TCP,8080/TCP,9093/TCP                                                                                     15m   istio=pilot
+service/istio-policy             ClusterIP   10.98.185.215    <none>        9091/TCP,15004/TCP,9093/TCP                                                                                               15m   istio-mixer-type=policy,istio=mixer
+service/istio-sidecar-injector   ClusterIP   10.97.47.179     <none>        443/TCP                                                                                                                   15m   istio=sidecar-injector
+service/istio-telemetry          ClusterIP   10.103.23.55     <none>        9091/TCP,15004/TCP,9093/TCP,42422/TCP                                                                                     15m   istio-mixer-type=telemetry,istio=mixer
+service/jaeger-agent             ClusterIP   None             <none>        5775/UDP,6831/UDP,6832/UDP                                                                                                15m   app=jaeger
+service/jaeger-collector         ClusterIP   10.110.10.174    <none>        14267/TCP,14268/TCP                                                                                                       15m   app=jaeger
+service/jaeger-query             ClusterIP   10.98.172.235    <none>        16686/TCP                                                                                                                 15m   app=jaeger
+service/kiali                    ClusterIP   10.111.114.225   <none>        20001/TCP                                                                                                                 15m   app=kiali
+service/prometheus               ClusterIP   10.111.132.151   <none>        9090/TCP                                                                                                                  15m   app=prometheus
+service/servicegraph             ClusterIP   10.109.59.250    <none>        8088/TCP                                                                                                                  15m   app=servicegraph
+service/tracing                  ClusterIP   10.96.59.251     <none>        80/TCP                                                                                                                    15m   app=jaeger
+service/zipkin                   ClusterIP   10.107.168.128   <none>        9411/TCP                                                                                                                  15m   app=jaeger
 
-NAME                                           DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS                 IMAGES                                                      SELECTOR
-deployment.extensions/grafana                  1         1         1            1           12m       grafana                    grafana/grafana:5.2.3                                       app=grafana
-deployment.extensions/istio-citadel            1         1         1            1           12m       citadel                    docker.io/istio/citadel:1.0.5                               istio=citadel
-deployment.extensions/istio-egressgateway      1         1         1            1           12m       istio-proxy                docker.io/istio/proxyv2:1.0.5                               app=istio-egressgateway,istio=egressgateway
-deployment.extensions/istio-galley             1         1         1            1           12m       validator                  docker.io/istio/galley:1.0.5                                istio=galley
-deployment.extensions/istio-ingressgateway     1         1         1            1           12m       istio-proxy                docker.io/istio/proxyv2:1.0.5                               app=istio-ingressgateway,istio=ingressgateway
-deployment.extensions/istio-pilot              1         1         1            1           12m       discovery,istio-proxy      docker.io/istio/pilot:1.0.5,docker.io/istio/proxyv2:1.0.5   app=pilot,istio=pilot
-deployment.extensions/istio-policy             1         1         1            1           12m       mixer,istio-proxy          docker.io/istio/mixer:1.0.5,docker.io/istio/proxyv2:1.0.5   app=policy,istio=mixer,istio-mixer-type=policy
-deployment.extensions/istio-sidecar-injector   1         1         1            1           12m       sidecar-injector-webhook   docker.io/istio/sidecar_injector:1.0.5                      istio=sidecar-injector
-deployment.extensions/istio-telemetry          1         1         1            1           12m       mixer,istio-proxy          docker.io/istio/mixer:1.0.5,docker.io/istio/proxyv2:1.0.5   app=telemetry,istio=mixer,istio-mixer-type=telemetry
-deployment.extensions/istio-tracing            1         1         1            1           12m       jaeger                     docker.io/jaegertracing/all-in-one:1.5                      app=jaeger
-deployment.extensions/kiali                    1         1         1            1           12m       kiali                      docker.io/kiali/kiali:v0.10                                 app=kiali
-deployment.extensions/prometheus               1         1         1            1           12m       prometheus                 docker.io/prom/prometheus:v2.3.1                            app=prometheus
-deployment.extensions/servicegraph             1         1         1            1           12m       servicegraph               docker.io/istio/servicegraph:1.0.5                          app=servicegraph
+NAME                                           READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS                 IMAGES                                                      SELECTOR
+deployment.extensions/grafana                  1/1     1            1           15m   grafana                    grafana/grafana:5.2.3                                       app=grafana
+deployment.extensions/istio-citadel            1/1     1            1           15m   citadel                    docker.io/istio/citadel:1.0.5                               istio=citadel
+deployment.extensions/istio-egressgateway      1/1     1            1           15m   istio-proxy                docker.io/istio/proxyv2:1.0.5                               app=istio-egressgateway,istio=egressgateway
+deployment.extensions/istio-galley             1/1     1            1           15m   validator                  docker.io/istio/galley:1.0.5                                istio=galley
+deployment.extensions/istio-ingressgateway     1/1     1            1           15m   istio-proxy                docker.io/istio/proxyv2:1.0.5                               app=istio-ingressgateway,istio=ingressgateway
+deployment.extensions/istio-pilot              1/1     1            1           15m   discovery,istio-proxy      docker.io/istio/pilot:1.0.5,docker.io/istio/proxyv2:1.0.5   app=pilot,istio=pilot
+deployment.extensions/istio-policy             1/1     1            1           15m   mixer,istio-proxy          docker.io/istio/mixer:1.0.5,docker.io/istio/proxyv2:1.0.5   app=policy,istio=mixer,istio-mixer-type=policy
+deployment.extensions/istio-sidecar-injector   1/1     1            1           15m   sidecar-injector-webhook   docker.io/istio/sidecar_injector:1.0.5                      istio=sidecar-injector
+deployment.extensions/istio-telemetry          1/1     1            1           15m   mixer,istio-proxy          docker.io/istio/mixer:1.0.5,docker.io/istio/proxyv2:1.0.5   app=telemetry,istio=mixer,istio-mixer-type=telemetry
+deployment.extensions/istio-tracing            1/1     1            1           15m   jaeger                     docker.io/jaegertracing/all-in-one:1.5                      app=jaeger
+deployment.extensions/kiali                    1/1     1            1           15m   kiali                      docker.io/kiali/kiali:v0.10                                 app=kiali
+deployment.extensions/prometheus               1/1     1            1           15m   prometheus                 docker.io/prom/prometheus:v2.3.1                            app=prometheus
+deployment.extensions/servicegraph             1/1     1            1           15m   servicegraph               docker.io/istio/servicegraph:1.0.5                          app=servicegraph
 
-NAME                                          READY     STATUS      RESTARTS   AGE       IP            NODE
-pod/grafana-59b8896965-7hclc                  1/1       Running     0          12m       10.244.2.15   pruzicka-k8s-istio-demo-node03
-pod/istio-citadel-856f994c58-tlkkb            1/1       Running     0          12m       10.244.1.19   pruzicka-k8s-istio-demo-node02
-pod/istio-egressgateway-5649fcf57-gbwm9       1/1       Running     0          12m       10.244.2.16   pruzicka-k8s-istio-demo-node03
-pod/istio-galley-7665f65c9c-mzw7p             1/1       Running     0          12m       10.244.1.22   pruzicka-k8s-istio-demo-node02
-pod/istio-grafana-post-install-zdtgm          0/1       Completed   0          9m        10.244.1.24   pruzicka-k8s-istio-demo-node02
-pod/istio-ingressgateway-6755b9bbf6-p6b5r     1/1       Running     0          12m       10.244.1.15   pruzicka-k8s-istio-demo-node02
-pod/istio-pilot-56855d999b-sfwzz              2/2       Running     0          12m       10.244.2.18   pruzicka-k8s-istio-demo-node03
-pod/istio-policy-6fcb6d655f-87lfs             2/2       Running     0          12m       10.244.1.17   pruzicka-k8s-istio-demo-node02
-pod/istio-sidecar-injector-768c79f7bf-nnzjr   1/1       Running     0          12m       10.244.1.23   pruzicka-k8s-istio-demo-node02
-pod/istio-telemetry-664d896cf5-54mps          2/2       Running     0          12m       10.244.1.16   pruzicka-k8s-istio-demo-node02
-pod/istio-tracing-6b994895fd-fzmp6            1/1       Running     0          12m       10.244.1.21   pruzicka-k8s-istio-demo-node02
-pod/kiali-67c69889b5-2fr28                    1/1       Running     0          12m       10.244.2.17   pruzicka-k8s-istio-demo-node03
-pod/prometheus-76b7745b64-x8f85               1/1       Running     0          12m       10.244.1.18   pruzicka-k8s-istio-demo-node02
-pod/servicegraph-5c4485945b-xdv56             1/1       Running     0          12m       10.244.1.20   pruzicka-k8s-istio-demo-node02
+NAME                                          READY   STATUS      RESTARTS   AGE   IP            NODE                             NOMINATED NODE   READINESS GATES
+pod/grafana-59b8896965-pmwd2                  1/1     Running     0          15m   10.244.1.16   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/istio-citadel-856f994c58-8r8nr            1/1     Running     0          15m   10.244.1.17   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/istio-egressgateway-5649fcf57-sv8wf       1/1     Running     0          15m   10.244.1.14   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/istio-galley-7665f65c9c-8sjmm             1/1     Running     0          15m   10.244.1.18   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/istio-grafana-post-install-kw74d          0/1     Completed   0          10m   10.244.1.19   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/istio-ingressgateway-6755b9bbf6-f7pnx     1/1     Running     0          15m   10.244.1.13   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/istio-pilot-56855d999b-6zq86              2/2     Running     0          15m   10.244.0.11   pruzicka-k8s-istio-demo-node01   <none>           <none>
+pod/istio-policy-6fcb6d655f-4zndw             2/2     Running     0          15m   10.244.2.13   pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/istio-sidecar-injector-768c79f7bf-74wbc   1/1     Running     0          15m   10.244.2.18   pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/istio-telemetry-664d896cf5-smz7w          2/2     Running     0          15m   10.244.2.14   pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/istio-tracing-6b994895fd-vb58q            1/1     Running     0          15m   10.244.2.17   pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/kiali-67c69889b5-sw92h                    1/1     Running     0          15m   10.244.1.15   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/prometheus-76b7745b64-kwzj5               1/1     Running     0          15m   10.244.2.15   pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/servicegraph-5c4485945b-j9bp2             1/1     Running     0          15m   10.244.2.16   pruzicka-k8s-istio-demo-node02   <none>           <none>
 ```
 
 Configure Istio with a new log type and send those logs to the FluentD:
@@ -838,15 +852,15 @@ kubectl get namespace -L istio-injection
 Output:
 
 ```shell
-NAME               STATUS    AGE       ISTIO-INJECTION
-default            Active    40m       enabled
-es-operator        Active    23m
-istio-system       Active    12m
-kube-public        Active    40m
-kube-system        Active    40m
-logging            Active    22m
-rook-ceph          Active    34m
-rook-ceph-system   Active    36m
+NAME               STATUS   AGE   ISTIO-INJECTION
+default            Active   70m   enabled
+es-operator        Active   41m
+istio-system       Active   16m
+kube-public        Active   70m
+kube-system        Active   70m
+logging            Active   38m
+rook-ceph          Active   59m
+rook-ceph-system   Active   63m
 ```
 
 Configure port forwarding for Istio services:
@@ -872,10 +886,10 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=se
 
 The Bookinfo application is broken into four separate microservices:
 
-* productpage - the productpage microservice calls the details and reviews microservices to populate the page.
-* details - the details microservice contains book information.
-* reviews - the reviews microservice contains book reviews. It also calls the ratings microservice.
-* ratings - the ratings microservice contains book ranking information that accompanies a book review.
+* `productpage` - the productpage microservice calls the details and reviews microservices to populate the page.
+* `details` - the details microservice contains book information.
+* `reviews` - the reviews microservice contains book reviews. It also calls the ratings microservice.
+* `ratings` - the ratings microservice contains book ranking information that accompanies a book review.
 
 There are 3 versions of the `reviews` microservice:
 
@@ -905,31 +919,31 @@ kubectl get svc,deployment,pods -o wide
 Output:
 
 ```shell
-NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE       SELECTOR
-service/details       ClusterIP   10.97.156.143    <none>        9080/TCP   4m        app=details
-service/kubernetes    ClusterIP   10.96.0.1        <none>        443/TCP    58m       <none>
-service/productpage   ClusterIP   10.111.118.194   <none>        9080/TCP   3m        app=productpage
-service/ratings       ClusterIP   10.104.20.168    <none>        9080/TCP   3m        app=ratings
-service/reviews       ClusterIP   10.97.181.246    <none>        9080/TCP   3m        app=reviews
+NAME                  TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE     SELECTOR
+service/details       ClusterIP   10.103.142.153   <none>        9080/TCP   4m21s   app=details
+service/kubernetes    ClusterIP   10.96.0.1        <none>        443/TCP    75m     <none>
+service/productpage   ClusterIP   10.111.62.53     <none>        9080/TCP   4m17s   app=productpage
+service/ratings       ClusterIP   10.110.22.215    <none>        9080/TCP   4m20s   app=ratings
+service/reviews       ClusterIP   10.100.73.81     <none>        9080/TCP   4m19s   app=reviews
 
-NAME                                   DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE       CONTAINERS    IMAGES                                         SELECTOR
-deployment.extensions/details-v1       1         1         1            1           3m        details       istio/examples-bookinfo-details-v1:1.8.0       app=details,version=v1
-deployment.extensions/productpage-v1   1         1         1            1           3m        productpage   istio/examples-bookinfo-productpage-v1:1.8.0   app=productpage,version=v1
-deployment.extensions/ratings-v1       1         1         1            1           3m        ratings       istio/examples-bookinfo-ratings-v1:1.8.0       app=ratings,version=v1
-deployment.extensions/reviews-v1       1         1         1            1           3m        reviews       istio/examples-bookinfo-reviews-v1:1.8.0       app=reviews,version=v1
-deployment.extensions/reviews-v2       1         1         1            1           3m        reviews       istio/examples-bookinfo-reviews-v2:1.8.0       app=reviews,version=v2
-deployment.extensions/reviews-v3       1         1         1            1           3m        reviews       istio/examples-bookinfo-reviews-v3:1.8.0       app=reviews,version=v3
+NAME                                   READY   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS    IMAGES                                         SELECTOR
+deployment.extensions/details-v1       1/1     1            1           4m21s   details       istio/examples-bookinfo-details-v1:1.8.0       app=details,version=v1
+deployment.extensions/productpage-v1   1/1     1            1           4m16s   productpage   istio/examples-bookinfo-productpage-v1:1.8.0   app=productpage,version=v1
+deployment.extensions/ratings-v1       1/1     1            1           4m20s   ratings       istio/examples-bookinfo-ratings-v1:1.8.0       app=ratings,version=v1
+deployment.extensions/reviews-v1       1/1     1            1           4m19s   reviews       istio/examples-bookinfo-reviews-v1:1.8.0       app=reviews,version=v1
+deployment.extensions/reviews-v2       1/1     1            1           4m18s   reviews       istio/examples-bookinfo-reviews-v2:1.8.0       app=reviews,version=v2
+deployment.extensions/reviews-v3       1/1     1            1           4m18s   reviews       istio/examples-bookinfo-reviews-v3:1.8.0       app=reviews,version=v3
 
-NAME                                      READY     STATUS    RESTARTS   AGE       IP            NODE
-pod/details-v1-68c7c8666d-hwggx           2/2       Running   0          3m        10.244.2.40   pruzicka-k8s-istio-demo-node02
-pod/elasticsearch-operator-sysctl-h5xds   1/1       Running   0          42m       10.244.2.10   pruzicka-k8s-istio-demo-node02
-pod/elasticsearch-operator-sysctl-kx4pg   1/1       Running   0          42m       10.244.0.7    pruzicka-k8s-istio-demo-node01
-pod/elasticsearch-operator-sysctl-pqbsz   1/1       Running   0          42m       10.244.1.9    pruzicka-k8s-istio-demo-node03
-pod/productpage-v1-54d799c966-f75rv       2/2       Running   0          3m        10.244.1.22   pruzicka-k8s-istio-demo-node03
-pod/ratings-v1-8558d4458d-l77gz           2/2       Running   0          3m        10.244.2.41   pruzicka-k8s-istio-demo-node02
-pod/reviews-v1-cb8655c75-md9mg            2/2       Running   0          3m        10.244.1.21   pruzicka-k8s-istio-demo-node03
-pod/reviews-v2-7fc9bb6dcf-qp4vs           2/2       Running   0          3m        10.244.0.12   pruzicka-k8s-istio-demo-node01
-pod/reviews-v3-c995979bc-zf2kg            2/2       Running   0          3m        10.244.2.42   pruzicka-k8s-istio-demo-node02
+NAME                                      READY   STATUS    RESTARTS   AGE     IP            NODE                             NOMINATED NODE   READINESS GATES
+pod/details-v1-68c7c8666d-pvrx6           2/2     Running   0          4m21s   10.244.1.20   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/elasticsearch-operator-sysctl-297j8   1/1     Running   0          45m     10.244.2.8    pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/elasticsearch-operator-sysctl-bg8rn   1/1     Running   0          45m     10.244.1.10   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/elasticsearch-operator-sysctl-vwvbl   1/1     Running   0          45m     10.244.0.8    pruzicka-k8s-istio-demo-node01   <none>           <none>
+pod/productpage-v1-54d799c966-2b4ss       2/2     Running   0          4m16s   10.244.1.23   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/ratings-v1-8558d4458d-ln99n           2/2     Running   0          4m20s   10.244.1.21   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/reviews-v1-cb8655c75-hpqfg            2/2     Running   0          4m19s   10.244.1.22   pruzicka-k8s-istio-demo-node03   <none>           <none>
+pod/reviews-v2-7fc9bb6dcf-snshx           2/2     Running   0          4m18s   10.244.2.19   pruzicka-k8s-istio-demo-node02   <none>           <none>
+pod/reviews-v3-c995979bc-wcql9            2/2     Running   0          4m18s   10.244.0.12   pruzicka-k8s-istio-demo-node01   <none>           <none>
 ```
 
 Check the container details - you should see also container `istio-proxy` next to `productpage`:
@@ -939,7 +953,7 @@ kubectl describe pod -l app=productpage
 kubectl logs $(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}') istio-proxy --tail=5
 ```
 
-Define the ingress gateway for the application:
+Define the [Istio gateway](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#Gateway) for the application:
 
 ```bash
 cat samples/bookinfo/networking/bookinfo-gateway.yaml
@@ -957,10 +971,10 @@ Output:
 
 ```shell
 NAME                                           AGE
-gateway.networking.istio.io/bookinfo-gateway   8s
+gateway.networking.istio.io/bookinfo-gateway   11s
 
 NAME                                          AGE
-virtualservice.networking.istio.io/bookinfo   7s
+virtualservice.networking.istio.io/bookinfo   12s
 ```
 
 Determining the ingress IP and ports when using a node port:
@@ -977,7 +991,7 @@ echo "$INGRESS_PORT | $SECURE_INGRESS_PORT | $INGRESS_HOST | $GATEWAY_URL"
 Output:
 
 ```shell
-31380 | 31390 | 172.16.241.103 | 172.16.241.103:31380
+31380 | 31390 | 172.16.242.170 | 172.16.242.170:31380
 ```
 
 Confirm the app is running:
@@ -992,7 +1006,7 @@ Output:
 200
 ```
 
-Create default destination rules (subsets) for the Bookinfo services:
+Create default [destination rules](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#DestinationRule) (subsets) for the Bookinfo services:
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/destination-rule-all.yaml
@@ -1004,19 +1018,25 @@ Display the destination rules:
 kubectl get destinationrules -o yaml
 ```
 
-Open the browser with these pages:
-
-* [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html)
-* [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
-* [http://localhost:20001](http://localhost:20001) (Graph)
-* [http://localhost:16686](http://localhost:16686)
-* [http://localhost:3000](http://localhost:3000) (Grafana -> Home -> Istio -> Istio Performance Dashboard, Istio Service Dashboard, Istio Workload Dashboard )
-
 Generate some traffic for next 5 minutes to gether some data:
 
 ```bash
 siege --log=/tmp/siege --concurrent=1 -q --internet --time=5M $GATEWAY_URL/productpage &
 ```
+
+Open the browser with these pages:
+
+* [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html)
+* [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
+* [http://localhost:20001](http://localhost:20001) (admin/admin)
+* [http://localhost:16686](http://localhost:16686)
+* [http://localhost:3000](http://localhost:3000) (Grafana -> Home -> Istio -> Istio Performance Dashboard, Istio Service Dashboard, Istio Workload Dashboard )
+
+* Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and refresh the page several times - you should see different versions of reviews shown in productpage, presented in a round robin style (red stars, black stars, no stars), since we haven’t yet used Istio to control the version routing.
+
+![Bookinfo v1, v3, v2](images/bookinfo_v1_v3_v2.gif "Bookinfo v1, v3, v2")
+
+* Check the flows in [Kiali](https://www.kiali.io/) graph
 
 ![Istio Graph](images/istio_kiali_graph.gif "Istio Graph")
 
@@ -1216,9 +1236,9 @@ Error fetching product reviews!
 Sorry, product reviews are currently unavailable for this book.
 ```
 
-* Open the Developer Tools menu (F12) -> Network tab - webpage actually loads in about 6 seconds.
+![Bookinfo Injecting an HTTP delay fault](images/bookinfo_injecting_http_delay_fault.gif "Bookinfo Injecting an HTTP delay fault")
 
-* Open Jaeger UI [http://localhost:16686](http://localhost:16686) and check the length of the query
+* Open the Developer Tools menu (F12) -> Network tab - webpage actually loads in about 6 seconds.
 
 ### Injecting an HTTP abort fault
 
@@ -1269,6 +1289,10 @@ spec:
 ```
 
 * On the `/productpage`, log in as user `jason` - the page loads immediately and the product ratings not available message appears.
+
+![Bookinfo Injecting an HTTP abort fault](images/bookinfo_injecting_http_abort_fault.gif "Bookinfo Injecting an HTTP abort fault")
+
+* Check the flows in Kiali graph
 
 ![Injecting an HTTP abort fault Kiali Graph](images/istio_kiali_injecting_an_http_abort_fault.gif "Injecting an HTTP abort fault Kiali Graph")
 
@@ -1329,6 +1353,8 @@ spec:
 
 * Refresh the `/productpage` in your browser and you now see **red** colored star ratings approximately **50%** of the time.
 
+* Check the flows in Kiali graph
+
 ![Weight-based routing Kiali Graph](images/istio_kiali_weight-based_routing.gif "Weight-based routing Kiali Graph")
 
 Assuming you decide that the `reviews:v3` microservice is stable, you can route **100%** of the traffic to `reviews:v3` by applying this virtual service.
@@ -1386,16 +1412,21 @@ EOF
 
 Check the logs on both pods `reviews:v1` and `reviews:v2`:
 
+```shell
+byobu
+byobu-tmux select-pane -t 0
+byobu-tmux split-window -v
+byobu-tmux select-pane -t 0
+```
+
 ```bash
 kubectl logs $(kubectl get pod -l app=reviews,version=v1 -o jsonpath='{.items[0].metadata.name}') istio-proxy --tail=10
 kubectl logs $(kubectl get pod -l app=reviews,version=v2 -o jsonpath='{.items[0].metadata.name}') istio-proxy --tail=10
 ```
 
-Do a simple query:
+* Do a simple query by refreshing the page in the web browser.
 
-```bash
-curl -o /dev/null -s -w "%{http_code}\n" http://${GATEWAY_URL}/productpage
-```
+* Check the flows in Kiali graph
 
 ![Mirroring Kiali Graph](images/istio_kiali_mirroring.gif "Mirroring Kiali Graph")
 
@@ -1407,7 +1438,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
 ## List of GUIs
 
-* Jaeger - [https://istio.io/docs/tasks/telemetry/distributed-tracing/](https://istio.io/docs/tasks/telemetry/distributed-tracing/)
+* [Jaeger](https://www.jaegertracing.io/) - [https://istio.io/docs/tasks/telemetry/distributed-tracing/](https://istio.io/docs/tasks/telemetry/distributed-tracing/)
 
     ```shell
     kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
@@ -1415,7 +1446,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:16686](http://localhost:16686)
 
-* Prometheus UI - [https://istio.io/docs/tasks/telemetry/querying-metrics/](https://istio.io/docs/tasks/telemetry/querying-metrics/)
+* [Prometheus UI](https://prometheus.io/) - [https://istio.io/docs/tasks/telemetry/querying-metrics/](https://istio.io/docs/tasks/telemetry/querying-metrics/)
 
     ```shell
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
@@ -1423,7 +1454,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:9090/graph](http://localhost:9090/graph)
 
-* Grafana - [https://istio.io/docs/tasks/telemetry/using-istio-dashboard/](https://istio.io/docs/tasks/telemetry/using-istio-dashboard/)
+* [Grafana](https://grafana.com/) - [https://istio.io/docs/tasks/telemetry/using-istio-dashboard/](https://istio.io/docs/tasks/telemetry/using-istio-dashboard/)
 
     ```shell
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
@@ -1431,7 +1462,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:3000/dashboard/db/istio-mesh-dashboard](http://localhost:3000/dashboard/db/istio-mesh-dashboard)
 
-* Kiali UI - [https://istio.io/docs/tasks/telemetry/kiali/](https://istio.io/docs/tasks/telemetry/kiali/)
+* [Kiali UI](https://www.kiali.io/) - [https://istio.io/docs/tasks/telemetry/kiali/](https://istio.io/docs/tasks/telemetry/kiali/)
 
     ```shell
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001 &
@@ -1451,7 +1482,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html), [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
 
-* Kibana UI
+* [Kibana UI](https://www.elastic.co/products/kibana)
 
     ```shell
     kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
@@ -1459,7 +1490,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [https://localhost:5601](https://localhost:5601)
 
-* Cerbero
+* [Cerbero](https://github.com/lmenezes/cerebro)
 
     ```shell
     kubectl -n logging port-forward $(kubectl -n logging get pod -l role=cerebro -o jsonpath='{.items[0].metadata.name}') 9000:9000 &
@@ -1467,7 +1498,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:9000](http://localhost:9000)
 
-* Ceph Dashboard
+* [Ceph Dashboard](http://docs.ceph.com/docs/mimic/mgr/dashboard/)
 
     ```shell
     kubectl -n rook-ceph port-forward $(kubectl -n rook-ceph get pod -l app=rook-ceph-mgr -o jsonpath='{.items[0].metadata.name}') 8443:8443 &
