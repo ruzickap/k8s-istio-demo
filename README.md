@@ -713,6 +713,9 @@ logging     pod/fluent-bit-fluent-bit-zfkqr   1/1     Running   0          80s  
 
 ## Istio Architecture
 
+Istio is an open platform-independent service mesh that provides traffic management, policy enforcement, and telemetry collection.
+(layer 7 firewall + loadbalancer)
+
 Few notes about Istio architecture...
 
 ![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg)
@@ -1032,7 +1035,7 @@ Open the browser with these pages:
 * [http://localhost:16686](http://localhost:16686)
 * [http://localhost:3000](http://localhost:3000) (Grafana -> Home -> Istio -> Istio Performance Dashboard, Istio Service Dashboard, Istio Workload Dashboard )
 
-* Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and refresh the page several times - you should see different versions of reviews shown in productpage, presented in a round robin style (red stars, black stars, no stars), since we haven’t yet used Istio to control the version routing.
+* Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and refresh the page several times - you should see different versions of reviews shown in productpage, presented in a **round robin style** (red stars, black stars, no stars), since we haven’t yet used Istio to control the version routing.
 
 ![Bookinfo v1, v3, v2](images/bookinfo_v1_v3_v2.gif "Bookinfo v1, v3, v2")
 
@@ -1173,14 +1176,21 @@ spec:
 
 ![Bookinfo v2](images/bookinfo_v2.jpg "Bookinfo v2")
 
-You can do the same with user-agent header for example:
+You can do the same with `user-agent header` or `URI` for example:
 
 ```yaml
+  ...
   http:
     - match:
-        - headers:
-            user-agent:
-              regex: '.*Firefox.*'
+      - headers:
+        user-agent:
+          regex: '.*Firefox.*'
+  ...
+  http:
+    - match:
+      - uri:
+        prefix: /api/v1
+  ...
 ```
 
 ### Injecting an HTTP delay fault
@@ -1239,6 +1249,27 @@ Sorry, product reviews are currently unavailable for this book.
 ![Bookinfo Injecting an HTTP delay fault](images/bookinfo_injecting_http_delay_fault.gif "Bookinfo Injecting an HTTP delay fault")
 
 * Open the Developer Tools menu (F12) -> Network tab - webpage actually loads in about 6 seconds.
+
+The following example introduces a **5 second delay** in **10%** of the requests to the `v1` version of the `ratings` microservice:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - fault:
+      delay:
+        percent: 10
+        fixedDelay: 5s
+    route:
+    - destination:
+        host: ratings
+        subset: v1
+```
 
 ### Injecting an HTTP abort fault
 
@@ -1300,6 +1331,27 @@ spec:
 
 ```bash
 kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+```
+
+The following example returns an **HTTP 400** error code for **10%** of the requests to the `ratings` service `v1`:
+
+```yaml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: ratings
+spec:
+  hosts:
+  - ratings
+  http:
+  - fault:
+      abort:
+        percent: 10
+        httpStatus: 400
+    route:
+    - destination:
+        host: ratings
+        subset: v1
 ```
 
 ### Weight-based routing
