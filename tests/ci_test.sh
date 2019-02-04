@@ -94,4 +94,4 @@ kubeadm-dind-cluster_install
 kubectl cluster-info
 
 # k8s commands (use everything starting from Helm installation 'curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash')
-sed -n '/^```bash/,/^```/p' README.md | sed '/^```*/d' | sed -n '/^curl -s https:\/\/raw.githubusercontent.com\/helm\/helm\/master\/scripts\/get | bash/,$p' | bash -eux
+sed -n '/^```bash$/,/^```$/p' README.md | sed '/^```*/d' | sed -n '/^curl -s https:\/\/raw.githubusercontent.com\/helm\/helm\/master\/scripts\/get | bash/,$p' | bash -eux
