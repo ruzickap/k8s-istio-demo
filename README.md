@@ -62,14 +62,14 @@ Install necessary software into the Docker container:
 
 ```bash
 apt update -qq
-apt install -y -qq apt-transport-https curl firefox git gnupg jq openssh-client siege unzip vim
+apt-get install -y -qq apt-transport-https curl firefox git gnupg jq openssh-client siege unzip vim > /dev/null
 ```
 
 Install `kubernetes-client` package - (`kubectl`):
 
 ```bash
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | tee -a /etc/apt/sources.list.d/kubernetes.list
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" > /etc/apt/sources.list.d/kubernetes.list
 apt-get update -qq
 apt-get install -y -qq kubectl
 ```
@@ -253,7 +253,7 @@ Install [Rook](https://rook.io/) Operator ([Ceph](https://ceph.com/) storage for
 ```bash
 helm repo add rook-stable https://charts.rook.io/stable
 helm install --wait --name rook-ceph --namespace rook-ceph-system rook-stable/rook-ceph
-sleep 20
+sleep 110
 ```
 
 See how the rook-ceph-system should look like:
@@ -289,7 +289,7 @@ Get the [Toolbox](https://rook.io/docs/rook/master/ceph-toolbox.html) with ceph 
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/toolbox.yaml
-sleep 250
+sleep 300
 ```
 
 Check what was created in `rook-ceph` namespace:
@@ -336,7 +336,6 @@ Create a storage class based on the Ceph RBD volume plugin:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/storageclass.yaml
-# Give Ceph some time to create pool...
 sleep 10
 ```
 
@@ -633,7 +632,7 @@ helm install --wait --name=elasticsearch --namespace logging es-operator/elastic
   --set cerebro.enabled=true \
   --set storage.class=rook-ceph-block \
   --set clientReplicas=1,masterReplicas=1,dataReplicas=1
-sleep 300
+sleep 350
 ```
 
 Show ElasticSearch components:
@@ -881,16 +880,16 @@ Configure port forwarding for Istio services:
 # Jaeger - http://localhost:16686
 kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath="{.items[0].metadata.name}") 16686:16686 &
 
-# Prometheus UI - http://localhost:9090/graph
+# Prometheus - http://localhost:9090/graph
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath="{.items[0].metadata.name}") 9090:9090 &
 
 # Grafana - http://localhost:3000/dashboard/db/istio-mesh-dashboard
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath="{.items[0].metadata.name}") 3000:3000 &
 
-# Kiali UI - http://localhost:20001
+# Kiali - http://localhost:20001
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath="{.items[0].metadata.name}") 20001:20001 &
 
-# Servicegraph UI - http://localhost:8088/force/forcegraph.html
+# Servicegraph - http://localhost:8088/force/forcegraph.html
 kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath="{.items[0].metadata.name}") 8088:8088 &
 ```
 
@@ -919,7 +918,7 @@ Deploy the demo of [Bookinfo](https://istio.io/docs/examples/bookinfo/) applicat
 
 ```bash
 kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
-sleep 300
+sleep 350
 ```
 
 Confirm all services and pods are correctly defined and running:
@@ -970,7 +969,7 @@ Define the [Istio gateway](https://istio.io/docs/reference/config/istio.networki
 ```bash
 cat samples/bookinfo/networking/bookinfo-gateway.yaml
 kubectl apply -f samples/bookinfo/networking/bookinfo-gateway.yaml
-sleep 10
+sleep 5
 ```
 
 Confirm the gateway has been created:
@@ -1336,12 +1335,6 @@ spec:
 
 ![Injecting an HTTP abort fault Kiali Graph](images/istio_kiali_injecting_an_http_abort_fault.gif "Injecting an HTTP abort fault Kiali Graph")
 
-* Remove the application routing rules:
-
-```bash
-kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
-```
-
 The following example returns an **HTTP 400** error code for **10%** of the requests to the `ratings` service `v1`:
 
 ```yaml
@@ -1428,12 +1421,6 @@ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
 
 ![Bookinfo v3](images/bookinfo_v3.jpg "Bookinfo v3")
 
-* Remove the application routing rules:
-
-```bash
-kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
-```
-
 ### Mirroring
 
 [https://istio.io/docs/tasks/traffic-management/mirroring/](https://istio.io/docs/tasks/traffic-management/mirroring/)
@@ -1491,10 +1478,12 @@ kubectl logs $(kubectl get pod -l app=reviews,version=v2 -o jsonpath="{.items[0]
 
 ![Mirroring Kiali Graph](images/istio_kiali_mirroring.gif "Mirroring Kiali Graph")
 
-* Remove the application routing rules:
+* Remove the Bookinfo application and clean it up (delete the routing rules and terminate the application pods):
 
 ```bash
-kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
+killall kubectl siege
+sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
+./samples/bookinfo/platform/kube/cleanup.sh
 ```
 
 ## List of GUIs
@@ -1507,7 +1496,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:16686](http://localhost:16686)
 
-* [Prometheus UI](https://prometheus.io/) - [https://istio.io/docs/tasks/telemetry/querying-metrics/](https://istio.io/docs/tasks/telemetry/querying-metrics/)
+* [Prometheus](https://prometheus.io/) - [https://istio.io/docs/tasks/telemetry/querying-metrics/](https://istio.io/docs/tasks/telemetry/querying-metrics/)
 
     ```shell
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath="{.items[0].metadata.name}") 9090:9090 &
@@ -1523,7 +1512,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:3000/dashboard/db/istio-mesh-dashboard](http://localhost:3000/dashboard/db/istio-mesh-dashboard)
 
-* [Kiali UI](https://www.kiali.io/) - [https://istio.io/docs/tasks/telemetry/kiali/](https://istio.io/docs/tasks/telemetry/kiali/)
+* [Kiali](https://www.kiali.io/) - [https://istio.io/docs/tasks/telemetry/kiali/](https://istio.io/docs/tasks/telemetry/kiali/)
 
     ```shell
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath="{.items[0].metadata.name}") 20001:20001 &
@@ -1535,7 +1524,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:20001](http://localhost:20001)
 
-* Servicegraph UI - [https://istio.io/docs/tasks/telemetry/servicegraph/](https://istio.io/docs/tasks/telemetry/servicegraph/)
+* Servicegraph - [https://istio.io/docs/tasks/telemetry/servicegraph/](https://istio.io/docs/tasks/telemetry/servicegraph/)
 
     ```shell
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath="{.items[0].metadata.name}") 8088:8088 &
@@ -1543,7 +1532,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 
     Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html), [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
 
-* [Kibana UI](https://www.elastic.co/products/kibana)
+* [Kibana](https://www.elastic.co/products/kibana)
 
     ```shell
     kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath="{.items[0].metadata.name}") 5601:5601 &
