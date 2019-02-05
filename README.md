@@ -77,7 +77,7 @@ apt-get install -y -qq kubectl
 Install [Terraform](https://www.terraform.io/):
 
 ```bash
-TERRAFORM_LATEST_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M '.current_version')
+TERRAFORM_LATEST_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M ".current_version")
 curl --silent --location https://releases.hashicorp.com/terraform/${TERRAFORM_LATEST_VERSION}/terraform_${TERRAFORM_LATEST_VERSION}_linux_amd64.zip --output /tmp/terraform_linux_amd64.zip
 unzip -o /tmp/terraform_linux_amd64.zip -d /usr/local/bin/
 ```
@@ -114,15 +114,15 @@ Modify the Terraform variable file if needed:
 OPENSTACK_PASSWORD=${OPENSTACK_PASSWORD:-default}
 
 cat > terrafrom/openstack/terraform.tfvars << EOF
-openstack_auth_url                                 = "https://ic-us.ssl.mirantis.net:5000/v3"
-openstack_instance_flavor_name                     = "compact.dbs"
-openstack_instance_image_name                      = "bionic-server-cloudimg-amd64-20190119"
-openstack_networking_subnet_dns_nameservers        = ["172.19.80.70"]
-openstack_password                                 = "$OPENSTACK_PASSWORD"
-openstack_tenant_name                              = "mirantis-services-team"
-openstack_user_name                                = "pruzicka"
-openstack_user_domain_name                         = "ldap_mirantis"
-prefix                                             = "pruzicka-k8s-istio-demo"
+openstack_auth_url                          = "https://ic-us.ssl.mirantis.net:5000/v3"
+openstack_instance_flavor_name              = "compact.dbs"
+openstack_instance_image_name               = "bionic-server-cloudimg-amd64-20190119"
+openstack_networking_subnet_dns_nameservers = ["172.19.80.70"]
+openstack_password                          = "$OPENSTACK_PASSWORD"
+openstack_tenant_name                       = "mirantis-services-team"
+openstack_user_name                         = "pruzicka"
+openstack_user_domain_name                  = "ldap_mirantis"
+prefix                                      = "pruzicka-k8s-istio-demo"
 EOF
 ```
 
@@ -253,7 +253,7 @@ Install [Rook](https://rook.io/) Operator ([Ceph](https://ceph.com/) storage for
 ```bash
 helm repo add rook-stable https://charts.rook.io/stable
 helm install --wait --name rook-ceph --namespace rook-ceph-system rook-stable/rook-ceph
-sleep 10
+sleep 20
 ```
 
 See how the rook-ceph-system should look like:
@@ -282,7 +282,7 @@ Create your Rook cluster:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml
-sleep 50
+sleep 100
 ```
 
 Get the [Toolbox](https://rook.io/docs/rook/master/ceph-toolbox.html) with ceph commands:
@@ -343,7 +343,7 @@ sleep 10
 Set `rook-ceph-block` as default Storage Class:
 
 ```bash
-kubectl patch storageclass rook-ceph-block -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+kubectl patch storageclass rook-ceph-block -p "{\"metadata\": {\"annotations\":{\"storageclass.kubernetes.io/is-default-class\":\"true\"}}}"
 ```
 
 Check the Storage Classes:
@@ -397,7 +397,7 @@ Events:    <none>
 Check the status of your Ceph installation:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph status
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph status
 ```
 
 Output:
@@ -422,7 +422,7 @@ Output:
 Ceph status:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd status
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph osd status
 ```
 
 Output:
@@ -440,7 +440,7 @@ Output:
 Check health of Ceph cluster:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph health detail
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph health detail
 ```
 
 Output:
@@ -452,13 +452,13 @@ HEALTH_OK
 Check monitor quorum status of Ceph:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph quorum_status --format json-pretty
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph quorum_status --format json-pretty
 ```
 
 Dump monitoring information from Ceph:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph mon dump
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph mon dump
 ```
 
 Output:
@@ -477,7 +477,7 @@ created 2019-02-04 09:40:08.865074
 Check the cluster usage status:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph df
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph df
 ```
 
 Output:
@@ -494,7 +494,7 @@ POOLS:
 Check OSD usage of Ceph:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd df
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph osd df
 ```
 
 Output:
@@ -511,7 +511,7 @@ MIN/MAX VAR: 0.94/1.08  STDDEV: 1.40
 Check the Ceph monitor:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph mon stat
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph mon stat
 ```
 
 Output:
@@ -523,7 +523,7 @@ e3: 3 mons at {a=10.102.39.160:6790/0,b=10.102.49.137:6790/0,c=10.96.25.143:6790
 Check OSD stats:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd stat
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph osd stat
 ```
 
 Output:
@@ -535,7 +535,7 @@ Output:
 Check pool stats:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd pool stats
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph osd pool stats
 ```
 
 Output:
@@ -548,7 +548,7 @@ pool replicapool id 1
 Check pg stats:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph pg stat
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph pg stat
 ```
 
 Output:
@@ -560,7 +560,7 @@ Output:
 List the Ceph pools in detail:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd pool ls detail
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph osd pool ls detail
 ```
 
 Output:
@@ -572,7 +572,7 @@ pool 1 'replicapool' replicated size 1 min_size 1 crush_rule 1 object_hash rjenk
 Check the CRUSH map view of OSDs:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph osd tree
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph osd tree
 ```
 
 Output:
@@ -591,7 +591,7 @@ ID CLASS WEIGHT  TYPE NAME                               STATUS REWEIGHT PRI-AFF
 List the cluster authentication keys:
 
 ```bash
-kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath='{.items[0].metadata.name}') -- ceph auth list
+kubectl -n rook-ceph exec $(kubectl -n rook-ceph get pod -l "app=rook-ceph-tools" -o jsonpath="{.items[0].metadata.name}") -- ceph auth list
 ```
 
 ## Install ElasticSearch, Kibana, Fluentbit
@@ -633,7 +633,7 @@ helm install --wait --name=elasticsearch --namespace logging es-operator/elastic
   --set cerebro.enabled=true \
   --set storage.class=rook-ceph-block \
   --set clientReplicas=1,masterReplicas=1,dataReplicas=1
-sleep 500
+sleep 300
 ```
 
 Show ElasticSearch components:
@@ -687,7 +687,7 @@ Configure port forwarding for Kibana:
 
 ```bash
 # Kibana UI - https://localhost:5601
-kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath="{.items[0].metadata.name}") 5601:5601 &
 ```
 
 Configure ElasticSearch:
@@ -753,6 +753,12 @@ Change the directory to the Istio installation files location:
 
 ```bash
 cd istio*
+```
+
+Install `istioctl`:
+
+```bash
+sudo mv bin/istioctl /usr/local/bin/
 ```
 
 Install [Istio](https://istio.io/) using Helm:
@@ -873,19 +879,19 @@ Configure port forwarding for Istio services:
 
 ```bash
 # Jaeger - http://localhost:16686
-kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
+kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath="{.items[0].metadata.name}") 16686:16686 &
 
 # Prometheus UI - http://localhost:9090/graph
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath="{.items[0].metadata.name}") 9090:9090 &
 
 # Grafana - http://localhost:3000/dashboard/db/istio-mesh-dashboard
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath="{.items[0].metadata.name}") 3000:3000 &
 
 # Kiali UI - http://localhost:20001
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001 &
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath="{.items[0].metadata.name}") 20001:20001 &
 
 # Servicegraph UI - http://localhost:8088/force/forcegraph.html
-kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}') 8088:8088 &
+kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath="{.items[0].metadata.name}") 8088:8088 &
 ```
 
 ### Deploy application into the default namespace where Istio is enabled
@@ -956,7 +962,7 @@ Check the container details - you should see also container `istio-proxy` next t
 
 ```bash
 kubectl describe pod -l app=productpage
-kubectl logs $(kubectl get pod -l app=productpage -o jsonpath='{.items[0].metadata.name}') istio-proxy --tail=5
+kubectl logs $(kubectl get pod -l app=productpage -o jsonpath="{.items[0].metadata.name}") istio-proxy --tail=5
 ```
 
 Define the [Istio gateway](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#Gateway) for the application:
@@ -986,10 +992,10 @@ virtualservice.networking.istio.io/bookinfo   12s
 Determining the ingress IP and ports when using a node port:
 
 ```bash
-export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="http2")].nodePort}')
-export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath='{.spec.ports[?(@.name=="https")].nodePort}')
-export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o 'jsonpath={.items[0].status.hostIP}')
-# export INGRESS_HOST=$(terraform output -json -state=../../terraform.tfstate | jq -r '.vms_public_ip.value[0]')
+export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath="{.spec.ports[?(@.name==\"http2\")].nodePort}")
+export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath="{.spec.ports[?(@.name==\"https\")].nodePort}")
+export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o "jsonpath={.items[0].status.hostIP}")
+# export INGRESS_HOST=$(terraform output -json -state=../../terraform.tfstate | jq -r ".vms_public_ip.value[0]")
 export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 echo "$INGRESS_PORT | $SECURE_INGRESS_PORT | $INGRESS_HOST | $GATEWAY_URL"
 ```
@@ -1475,8 +1481,8 @@ byobu-tmux select-pane -t 0
 ```
 
 ```bash
-kubectl logs $(kubectl get pod -l app=reviews,version=v1 -o jsonpath='{.items[0].metadata.name}') istio-proxy --tail=10
-kubectl logs $(kubectl get pod -l app=reviews,version=v2 -o jsonpath='{.items[0].metadata.name}') istio-proxy --tail=10
+kubectl logs $(kubectl get pod -l app=reviews,version=v1 -o jsonpath="{.items[0].metadata.name}") istio-proxy --tail=10
+kubectl logs $(kubectl get pod -l app=reviews,version=v2 -o jsonpath="{.items[0].metadata.name}") istio-proxy --tail=10
 ```
 
 * Do a simple query by refreshing the page in the web browser.
@@ -1496,7 +1502,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 * [Jaeger](https://www.jaegertracing.io/) - [https://istio.io/docs/tasks/telemetry/distributed-tracing/](https://istio.io/docs/tasks/telemetry/distributed-tracing/)
 
     ```shell
-    kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath='{.items[0].metadata.name}') 16686:16686 &
+    kubectl port-forward -n istio-system $(kubectl get pod -n istio-system -l app=jaeger -o jsonpath="{.items[0].metadata.name}") 16686:16686 &
     ```
 
     Link: [http://localhost:16686](http://localhost:16686)
@@ -1504,7 +1510,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 * [Prometheus UI](https://prometheus.io/) - [https://istio.io/docs/tasks/telemetry/querying-metrics/](https://istio.io/docs/tasks/telemetry/querying-metrics/)
 
     ```shell
-    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath='{.items[0].metadata.name}') 9090:9090 &
+    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=prometheus -o jsonpath="{.items[0].metadata.name}") 9090:9090 &
     ```
 
     Link: [http://localhost:9090/graph](http://localhost:9090/graph)
@@ -1512,7 +1518,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 * [Grafana](https://grafana.com/) - [https://istio.io/docs/tasks/telemetry/using-istio-dashboard/](https://istio.io/docs/tasks/telemetry/using-istio-dashboard/)
 
     ```shell
-    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath='{.items[0].metadata.name}') 3000:3000 &
+    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=grafana -o jsonpath="{.items[0].metadata.name}") 3000:3000 &
     ```
 
     Link: [http://localhost:3000/dashboard/db/istio-mesh-dashboard](http://localhost:3000/dashboard/db/istio-mesh-dashboard)
@@ -1520,7 +1526,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 * [Kiali UI](https://www.kiali.io/) - [https://istio.io/docs/tasks/telemetry/kiali/](https://istio.io/docs/tasks/telemetry/kiali/)
 
     ```shell
-    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath='{.items[0].metadata.name}') 20001:20001 &
+    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=kiali -o jsonpath="{.items[0].metadata.name}") 20001:20001 &
     ```
 
     Login: admin
@@ -1532,7 +1538,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 * Servicegraph UI - [https://istio.io/docs/tasks/telemetry/servicegraph/](https://istio.io/docs/tasks/telemetry/servicegraph/)
 
     ```shell
-    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath='{.items[0].metadata.name}') 8088:8088 &
+    kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath="{.items[0].metadata.name}") 8088:8088 &
     ```
 
     Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html), [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
@@ -1540,7 +1546,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 * [Kibana UI](https://www.elastic.co/products/kibana)
 
     ```shell
-    kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath='{.items[0].metadata.name}') 5601:5601 &
+    kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o jsonpath="{.items[0].metadata.name}") 5601:5601 &
     ```
 
     Link: [https://localhost:5601](https://localhost:5601)
@@ -1548,7 +1554,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 * [Cerbero](https://github.com/lmenezes/cerebro)
 
     ```shell
-    kubectl -n logging port-forward $(kubectl -n logging get pod -l role=cerebro -o jsonpath='{.items[0].metadata.name}') 9000:9000 &
+    kubectl -n logging port-forward $(kubectl -n logging get pod -l role=cerebro -o jsonpath="{.items[0].metadata.name}") 9000:9000 &
     ```
 
     Link: [http://localhost:9000](http://localhost:9000)
@@ -1556,7 +1562,7 @@ kubectl delete -f samples/bookinfo/networking/virtual-service-all-v1.yaml
 * [Ceph Dashboard](http://docs.ceph.com/docs/mimic/mgr/dashboard/)
 
     ```shell
-    kubectl -n rook-ceph port-forward $(kubectl -n rook-ceph get pod -l app=rook-ceph-mgr -o jsonpath='{.items[0].metadata.name}') 8443:8443 &
+    kubectl -n rook-ceph port-forward $(kubectl -n rook-ceph get pod -l app=rook-ceph-mgr -o jsonpath="{.items[0].metadata.name}") 8443:8443 &
     ```
 
     Login: admin
