@@ -42,7 +42,7 @@ export TERM=linux
 export DEBIAN_FRONTEND=noninteractive
 
 sudo apt-get update -qq
-sudo --preserve-env apt-get install -qq -y curl ebtables jq siege socat unzip > /dev/null
+sudo --preserve-env apt-get install -qq -y curl ebtables jq pv siege socat unzip > /dev/null
 which docker || sudo apt-get install -qq -y docker.io > /dev/null # Appveyor workaround - docker.io will replace installed docker-ce
 sudo -E which npm || sudo apt-get install -qq -y npm > /dev/null  # Appveyor workaround - npm can not be installed there
 
@@ -94,4 +94,16 @@ kubeadm-dind-cluster_install
 kubectl cluster-info
 
 # k8s commands (use everything starting from Helm installation 'curl https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash')
-sed -n '/^```bash$/,/^```$/p' README.md | sed '/^```*/d' | sed -n '/^curl -s https:\/\/raw.githubusercontent.com\/helm\/helm\/master\/scripts\/get | bash/,$p' | bash -eux
+sed -n '/^```bash$/,/^```$/p' README.md | sed '/^```*/d' | sed -n '/^curl -s https:\/\/raw.githubusercontent.com\/helm\/helm\/master\/scripts\/get | bash/,$p' > README.sh
+source ./README.sh
+
+# Istio cleanup
+# Remove read file to remove interactive input
+killall kubectl siege
+sed -i '/read NAMESPACE/d' ./samples/bookinfo/platform/kube/cleanup.sh
+./samples/bookinfo/platform/kube/cleanup.sh
+
+helm del --purge istio
+kubectl -n istio-system delete job --all
+kubectl delete -f install/kubernetes/helm/istio/templates/crds.yaml -n istio-system
+kubectl delete namespace istio-system
