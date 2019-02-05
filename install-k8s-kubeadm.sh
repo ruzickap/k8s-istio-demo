@@ -8,13 +8,13 @@ CNI_URL="https://raw.githubusercontent.com/coreos/flannel/master/Documentation/k
 
 INSTALL_KUBERNETES="
 export DEBIAN_FRONTEND='noninteractive'
-apt-get update -qq && apt-get install -y -qq apt-transport-https curl
+apt-get update -qq && apt-get install -y -qq apt-transport-https curl > /dev/null
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 cat > /etc/apt/sources.list.d/kubernetes.list << EOF2
 deb https://apt.kubernetes.io/ kubernetes-xenial main
 EOF2
 apt-get update -qq
-apt-get install -y -qq --no-install-recommends chrony docker.io kubelet=${KUBERNETES_VERSION}-00 kubeadm=${KUBERNETES_VERSION}-00 kubectl=${KUBERNETES_VERSION}-00
+apt-get install -y -qq --no-install-recommends chrony docker.io kubelet=${KUBERNETES_VERSION}-00 kubeadm=${KUBERNETES_VERSION}-00 kubectl=${KUBERNETES_VERSION}-00 > /dev/null
 systemctl enable docker.service
 "
 
