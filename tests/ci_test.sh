@@ -98,11 +98,6 @@ sed -n '/^```bash$/,/^```$/p' README.md | sed '/^```*/d' | sed -n '/^curl -s htt
 source ./README.sh
 
 # Istio cleanup
-# Remove read file to remove interactive input
-killall kubectl siege
-sed -i '/read NAMESPACE/d' ./samples/bookinfo/platform/kube/cleanup.sh
-./samples/bookinfo/platform/kube/cleanup.sh
-
 helm del --purge istio
 kubectl -n istio-system delete job --all
 kubectl delete -f install/kubernetes/helm/istio/templates/crds.yaml -n istio-system
