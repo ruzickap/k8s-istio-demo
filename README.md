@@ -918,7 +918,7 @@ Deploy the demo of [Bookinfo](https://istio.io/docs/examples/bookinfo/) applicat
 
 ```bash
 kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
-sleep 350
+sleep 400
 ```
 
 Confirm all services and pods are correctly defined and running:
