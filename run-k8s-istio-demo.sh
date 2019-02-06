@@ -16,7 +16,7 @@ test -f ./demo-magic.sh || curl --silent https://raw.githubusercontent.com/paxto
 TYPE_SPEED=40
 
 # Uncomment to run non-interactively
-export PROMPT_TIMEOUT=1
+#export PROMPT_TIMEOUT=1
 
 # No wait
 export NO_WAIT=true
