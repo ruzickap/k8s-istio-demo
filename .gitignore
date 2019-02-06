@@ -16,3 +16,5 @@ files
 kubeconfig.conf
 # nohup output
 nohup.out
+# Ignore temporary README.sh script
+README.sh
