@@ -6,6 +6,8 @@
 
 Find below few commands showing basics of [Istio](https://istio.io/)...
 
+Full asciinema demo can be found here: [https://asciinema.org/a/ijQFeXdhOvptOtCVWIthLyJvb](https://asciinema.org/a/ijQFeXdhOvptOtCVWIthLyJvb)
+
 ## Requirements
 
 * [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (kubernetes-client package)
@@ -788,6 +790,8 @@ helm install --wait --name istio --namespace istio-system install/kubernetes/hel
   --set tracing.enabled=true
 ```
 
+-----
+
 See the Istio components:
 
 ```bash
@@ -847,6 +851,8 @@ pod/kiali-67c69889b5-sw92h                    1/1     Running     0          15m
 pod/prometheus-76b7745b64-kwzj5               1/1     Running     0          15m   10.244.2.15   pruzicka-k8s-istio-demo-node02   <none>           <none>
 pod/servicegraph-5c4485945b-j9bp2             1/1     Running     0          15m   10.244.2.16   pruzicka-k8s-istio-demo-node02   <none>           <none>
 ```
+
+-----
 
 Configure Istio with a new log type and send those logs to the FluentD:
 
@@ -976,6 +982,8 @@ kubectl describe pod -l app=productpage
 kubectl logs $(kubectl get pod -l app=productpage -o jsonpath="{.items[0].metadata.name}") istio-proxy --tail=5
 ```
 
+-----
+
 Define the [Istio gateway](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#Gateway) for the application:
 
 ```bash
@@ -1006,7 +1014,9 @@ Determining the ingress IP and ports when using a node port:
 export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath="{.spec.ports[?(@.name==\"http2\")].nodePort}")
 export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath="{.spec.ports[?(@.name==\"https\")].nodePort}")
 export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o "jsonpath={.items[0].status.hostIP}")
-# export INGRESS_HOST=$(terraform output -json -state=../../terraform.tfstate | jq -r ".vms_public_ip.value[0]")
+if test -f terraform.tfstate && grep -q vms_public_ip terraform.tfstate; then
+  export INGRESS_HOST=$(terraform output -json -state=../../terraform.tfstate | jq -r ".vms_public_ip.value[0]")
+fi
 export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
 echo "$INGRESS_PORT | $SECURE_INGRESS_PORT | $INGRESS_HOST | $GATEWAY_URL"
 ```
@@ -1016,6 +1026,8 @@ Output:
 ```shell
 31380 | 31390 | 172.16.242.170 | 172.16.242.170:31380
 ```
+
+-----
 
 Confirm the app is running:
 
@@ -1062,6 +1074,8 @@ Open the browser with these pages:
 * Check the flows in [Kiali](https://www.kiali.io/) graph
 
 ![Istio Graph](images/istio_kiali_graph.gif "Istio Graph")
+
+-----
 
 ### Configuring Request Routing
 
@@ -1146,6 +1160,8 @@ spec:
 
 ![Bookinfo v1](images/bookinfo_v1.jpg "Bookinfo v1")
 
+-----
+
 ### Route based on user identity
 
 [https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity](https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity)
@@ -1212,6 +1228,8 @@ You can do the same with `user-agent header` or `URI` for example:
         prefix: /api/v1
   ...
 ```
+
+-----
 
 ### Injecting an HTTP delay fault
 
@@ -1291,6 +1309,8 @@ spec:
         subset: v1
 ```
 
+-----
+
 ### Injecting an HTTP abort fault
 
 [https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault](https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault)
@@ -1368,6 +1388,8 @@ spec:
         subset: v1
 ```
 
+-----
+
 ### Weight-based routing
 
 [https://istio.io/docs/tasks/traffic-management/traffic-shifting/#apply-weight-based-routing](https://istio.io/docs/tasks/traffic-management/traffic-shifting/#apply-weight-based-routing)
@@ -1423,6 +1445,8 @@ spec:
 
 ![Weight-based routing Kiali Graph](images/istio_kiali_weight-based_routing.gif "Weight-based routing Kiali Graph")
 
+-----
+
 Assuming you decide that the `reviews:v3` microservice is stable, you can route **100%** of the traffic to `reviews:v3` by applying this virtual service.
 
 ```bash
@@ -1432,6 +1456,8 @@ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
 * When you refresh the `/productpage` you will always see book reviews with **red** colored star ratings for **each** review.
 
 ![Bookinfo v3](images/bookinfo_v3.jpg "Bookinfo v3")
+
+-----
 
 ### Mirroring
 
@@ -1469,6 +1495,8 @@ spec:
       subset: v2
 EOF
 ```
+
+-----
 
 Check the logs on both pods `reviews:v1` and `reviews:v2`:
 
