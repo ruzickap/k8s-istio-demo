@@ -34,10 +34,10 @@ clear
 
 ### Please run these commands before running the script
 
-# mkdir /tmp/test && cd /tmp/test
 # OPENSTACK_PASSWORD="my_secret_password"
-# docker run -it -rm -e DISPLAY=$DISPLAY -e OPENSTACK_PASSWORD=$OPENSTACK_PASSWORD -v /home/$USER/.ssh:/root/.ssh:ro -v /tmp/.X11-unix:/tmp/.X11-unix -v $PWD:/mnt ubuntu
-# apt update -qq && apt install -qq -y curl git psmisc pv sudo > /dev/null
+# mkdir /tmp/test && cd /tmp/test
+# docker run -it -rm -e DISPLAY=$DISPLAY -e OPENSTACK_PASSWORD=$OPENSTACK_PASSWORD -e SSH_AUTH_SOCK=/ssh-agent -v $SSH_AUTH_SOCK:/ssh-agent -v /home/$USER/.ssh:/root/.ssh:ro -v /tmp/.X11-unix:/tmp/.X11-unix -v $PWD:/mnt ubuntu
+# apt-get update -qq && apt-get install -qq -y curl git pv > /dev/null
 # git clone https://github.com/ruzickap/k8s-istio-demo && cd k8s-istio-demo
 # ./run-k8s-istio-openstack-full-demo.sh
 

@@ -62,7 +62,7 @@ Install necessary software into the Docker container:
 
 ```bash
 apt update -qq
-apt-get install -y -qq apt-transport-https curl firefox git gnupg jq openssh-client siege unzip vim > /dev/null
+apt-get install -y -qq apt-transport-https curl firefox git gnupg jq openssh-client psmisc siege sudo unzip vim > /dev/null
 ```
 
 Install `kubernetes-client` package - (`kubectl`):
@@ -98,7 +98,7 @@ Generate ssh keys if not exists:
 test -f $HOME/.ssh/id_rsa || ( install -m 0700 -d $HOME/.ssh && ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N "" )
 # ssh-agent must be running...
 test -n "$SSH_AUTH_SOCK" || eval `ssh-agent`
-ssh-add
+if [ "`ssh-add -l`" = "The agent has no identities." ]; then ssh-add; fi
 ```
 
 Clone this git repository:
