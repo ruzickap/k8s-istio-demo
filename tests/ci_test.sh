@@ -102,7 +102,7 @@ helm del --purge istio
 kubectl -n istio-system delete job --all
 kubectl delete -f install/kubernetes/helm/istio/templates/crds.yaml -n istio-system
 kubectl delete namespace istio-system
-kubectl label namespace default istio-injection=disabled
+kubectl label namespace default istio-injection-
 
 cd ../..
 rm -rf files
