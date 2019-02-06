@@ -248,6 +248,8 @@ kube-system   tiller-deploy-dbb85cb99-z4c47   1/1     Running   0          28s
 
 ## Instal Rook
 
+![Rook Architecture](https://raw.githubusercontent.com/rook/rook/master/Documentation/media/kubernetes.png "Rook Architecture")
+
 Install [Rook](https://rook.io/) Operator ([Ceph](https://ceph.com/) storage for k8s):
 
 ```bash
@@ -713,23 +715,33 @@ logging     pod/fluent-bit-fluent-bit-c6tbx   1/1     Running   0          80s  
 logging     pod/fluent-bit-fluent-bit-zfkqr   1/1     Running   0          80s   10.244.2.12   pruzicka-k8s-istio-demo-node02   <none>           <none>
 ```
 
-## Istio Architecture
+## Istio Architecture and features
 
 Istio is an open platform-independent service mesh that provides traffic management, policy enforcement, and telemetry collection.
 (layer 7 firewall + loadbalancer)
 
-Few notes about Istio architecture...
+* Istio Architectue
 
-![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg)
+  ![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg "Istio Architecture")
 
-* [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy) - is a high-performance proxy to mediate all inbound and outbound traffic for all services in the service mesh.
-* [Mixer](https://istio.io/docs/concepts/what-is-istio/#mixer) - enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services.
-* [Pilot](https://istio.io/docs/concepts/what-is-istio/#pilot) - provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing.
-* [Citadel](https://istio.io/docs/concepts/what-is-istio/#citadel) - provides strong service-to-service and end-user authentication with built-in identity and credential management.
+  * [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy) - is a high-performance proxy to mediate all inbound and outbound traffic for all services in the service mesh.
+  * [Mixer](https://istio.io/docs/concepts/what-is-istio/#mixer) - enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services.
+  * [Pilot](https://istio.io/docs/concepts/what-is-istio/#pilot) - provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing.
+  * [Citadel](https://istio.io/docs/concepts/what-is-istio/#citadel) - provides strong service-to-service and end-user authentication with built-in identity and credential management.
 
-![Traffic Management with Istio](https://istio.io/docs/concepts/traffic-management/TrafficManagementOverview.svg)
+* Blue-green deployment and Content based traffic steering
 
-![Istio Security Architecture](https://istio.io/docs/concepts/security/architecture.svg)
+  ![Traffic Management with Istio](https://istio.io/docs/concepts/traffic-management/TrafficManagementOverview.svg "Traffic Management with Istio")
+
+* Istio Security Architecture
+
+  ![Istio Security Architecture](https://istio.io/docs/concepts/security/architecture.svg "Istio Security Architecture")
+
+* [Mesh Expansion](https://istio.io/docs/setup/kubernetes/mesh-expansion/) - non-Kubernetes services(running on VMs and/or physical machines) can be added to an Istio mesh on a Kubernetes cluster. ([Istio mesh expansion on IBM Cloud Private](https://medium.com/ibm-cloud/istio-mesh-expansion-on-ibm-cloud-private-c335eabf7990))
+
+  ![Bookinfo Application with Istio Mesh Expansion](https://istio.io/docs/examples/integrating-vms/mesh-expansion.svg "Bookinfo Application with Istio Mesh Expansion")
+
+* [Istio Multicluster](https://istio.io/docs/setup/kubernetes/multicluster-install/) - multiple k8s clusters managed by single Istio instance
 
 ### Istio types
 
@@ -910,9 +922,9 @@ There are 3 versions of the `reviews` microservice:
 
 [Bookinfo](https://istio.io/docs/examples/bookinfo/) application architecture
 
-![Application Architecture without Istio](https://istio.io/docs/examples/bookinfo/noistio.svg)
+![Application Architecture without Istio](https://istio.io/docs/examples/bookinfo/noistio.svg "Application Architecture without Istio")
 
-![Application Architecture with Istio](https://istio.io/docs/examples/bookinfo/withistio.svg)
+![Application Architecture with Istio](https://istio.io/docs/examples/bookinfo/withistio.svg "Application Architecture with Istio")
 
 Deploy the demo of [Bookinfo](https://istio.io/docs/examples/bookinfo/) application:
 
