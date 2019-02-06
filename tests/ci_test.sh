@@ -106,4 +106,6 @@ kubectl label namespace default istio-injection-
 
 cd ../..
 rm -rf files
+
+export PROMPT_TIMEOUT=1
 ./run-k8s-istio-demo.sh

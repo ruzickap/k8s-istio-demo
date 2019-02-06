@@ -18,6 +18,9 @@ TYPE_SPEED=40
 # Uncomment to run non-interactively
 #export PROMPT_TIMEOUT=1
 
+# If this is running under CI disable any user interaction (not to stop on the "wait" funcion)
+[ "$CI" == "true" ] && export PROMPT_TIMEOUT=1
+
 # No wait
 export NO_WAIT=true
 
@@ -43,6 +46,5 @@ wait\
 pe '"'"'/' \
 -e 's/^```$/'"'"'/' \
 > README.sh
-
 
 source README.sh
