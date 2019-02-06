@@ -42,7 +42,7 @@ clear
 # ./run-k8s-istio-openstack-full-demo.sh
 
 sed -n '/^```bash$/,/^```$/p;/^-----$/p' README.md | \
-sed -n '/^apt update -qq/,$p' | sed '1s/^/```bash\n/' | \
+sed -n '/^apt update -qq$/,$p' | sed '1s/^/```bash\n/' | \
 sed -e 's/^-----$/\
 p  ""\
 p  "################################################################################################### Press <ENTER> to continue"\
