@@ -36,7 +36,7 @@ DEMO_PROMPT="${GREEN}➜ ${CYAN}$ "
 clear
 
 sed -n '/^```bash$/,/^```$/p;/^-----$/p' README.md | \
-sed -n '/^test -d files/,$p' | sed '1s/^/```bash\n/' | \
+sed -n '/^\[ -f \$PWD\/kubeconfig.conf \] && export KUBECONFIG=/,$p' | sed '1s/^/```bash\n/' | \
 sed -e 's/^-----$/\
 p  ""\
 p  "################################################################################################### Press <ENTER> to continue"\

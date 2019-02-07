@@ -719,16 +719,18 @@ logging     pod/fluent-bit-fluent-bit-zfkqr   1/1     Running   0          80s  
 
 ## Istio Architecture and features
 
-Istio is an open platform-independent service mesh that provides traffic management, policy enforcement, and telemetry collection.
-(layer 7 firewall + loadbalancer)
+Istio is an open platform-independent service mesh that provides traffic management, policy enforcement, and telemetry collection
+(layer 7 firewall + loadbalancer, ingress, blocking outgoing traffic, tracing, monitoring, logging).
+
+[Policies and Telemetry](https://istio.io/docs/reference/config/policy-and-telemetry/): [Prometheus](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/prometheus/), [StatsD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/statsd/), [FluentD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/fluentd/) and many [others](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/)...
 
 * Istio Architectue
 
   ![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg "Istio Architecture")
 
   * [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy) - is a high-performance proxy to mediate all inbound and outbound traffic for all services in the service mesh.
-  * [Mixer](https://istio.io/docs/concepts/what-is-istio/#mixer) - enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services.
   * [Pilot](https://istio.io/docs/concepts/what-is-istio/#pilot) - provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing.
+  * [Mixer](https://istio.io/docs/concepts/what-is-istio/#mixer) - enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services.
   * [Citadel](https://istio.io/docs/concepts/what-is-istio/#citadel) - provides strong service-to-service and end-user authentication with built-in identity and credential management.
 
 * Blue-green deployment and Content based traffic steering
@@ -753,6 +755,10 @@ Istio is an open platform-independent service mesh that provides traffic managem
 * [Gateway](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#Gateway) configures a load balancer for HTTP/TCP traffic, most commonly operating at the edge of the mesh to enable ingress traffic for an application.
 
 ## Install Istio
+
+```bash
+[ -f $PWD/kubeconfig.conf ] && export KUBECONFIG=${KUBECONFIG:-$PWD/kubeconfig.conf}
+```
 
 Either download Istio directly from [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases) or get the latest version by using curl:
 
@@ -789,8 +795,6 @@ helm install --wait --name istio --namespace istio-system install/kubernetes/hel
   --set telemetry-gateway.prometheusEnabled=true \
   --set tracing.enabled=true
 ```
-
------
 
 See the Istio components:
 
@@ -851,8 +855,6 @@ pod/kiali-67c69889b5-sw92h                    1/1     Running     0          15m
 pod/prometheus-76b7745b64-kwzj5               1/1     Running     0          15m   10.244.2.15   pruzicka-k8s-istio-demo-node02   <none>           <none>
 pod/servicegraph-5c4485945b-j9bp2             1/1     Running     0          15m   10.244.2.16   pruzicka-k8s-istio-demo-node02   <none>           <none>
 ```
-
------
 
 Configure Istio with a new log type and send those logs to the FluentD:
 
@@ -939,6 +941,8 @@ kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
 sleep 400
 ```
 
+-----
+
 Confirm all services and pods are correctly defined and running:
 
 ```bash
@@ -982,8 +986,6 @@ kubectl describe pod -l app=productpage
 kubectl logs $(kubectl get pod -l app=productpage -o jsonpath="{.items[0].metadata.name}") istio-proxy --tail=5
 ```
 
------
-
 Define the [Istio gateway](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#Gateway) for the application:
 
 ```bash
@@ -1014,7 +1016,7 @@ Determining the ingress IP and ports when using a node port:
 export INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath="{.spec.ports[?(@.name==\"http2\")].nodePort}")
 export SECURE_INGRESS_PORT=$(kubectl -n istio-system get service istio-ingressgateway -o jsonpath="{.spec.ports[?(@.name==\"https\")].nodePort}")
 export INGRESS_HOST=$(kubectl get po -l istio=ingressgateway -n istio-system -o "jsonpath={.items[0].status.hostIP}")
-if test -f terraform.tfstate && grep -q vms_public_ip terraform.tfstate; then
+if test -f ../../terraform.tfstate && grep -q vms_public_ip ../../terraform.tfstate; then
   export INGRESS_HOST=$(terraform output -json -state=../../terraform.tfstate | jq -r ".vms_public_ip.value[0]")
 fi
 export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
@@ -1518,9 +1520,14 @@ kubectl logs $(kubectl get pod -l app=reviews,version=v2 -o jsonpath="{.items[0]
 
 ![Mirroring Kiali Graph](images/istio_kiali_mirroring.gif "Mirroring Kiali Graph")
 
+-----
+
+## Cleanup
+
 * Remove the Bookinfo application and clean it up (delete the routing rules and terminate the application pods):
 
 ```bash
+# Clean everything - remove port-forward, Bookinfo application, all Istio VirtualServices, Gateways, DestinationRules
 killall kubectl siege
 sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
 ./samples/bookinfo/platform/kube/cleanup.sh
