@@ -717,14 +717,14 @@ logging     pod/fluent-bit-fluent-bit-c6tbx   1/1     Running   0          80s  
 logging     pod/fluent-bit-fluent-bit-zfkqr   1/1     Running   0          80s   10.244.2.12   pruzicka-k8s-istio-demo-node02   <none>           <none>
 ```
 
-## Istio Architecture and features
+## Istio architecture and features
 
 Istio is an open platform-independent service mesh that provides traffic management, policy enforcement, and telemetry collection
 (layer 7 firewall + loadbalancer, ingress, blocking outgoing traffic, tracing, monitoring, logging).
 
 [Policies and Telemetry](https://istio.io/docs/reference/config/policy-and-telemetry/): [Prometheus](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/prometheus/), [StatsD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/statsd/), [FluentD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/fluentd/) and many [others](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/)...
 
-* Istio Architectue
+* Istio architectue
 
   ![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg "Istio Architecture")
 
@@ -733,7 +733,7 @@ Istio is an open platform-independent service mesh that provides traffic managem
   * [Mixer](https://istio.io/docs/concepts/what-is-istio/#mixer) - enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services.
   * [Citadel](https://istio.io/docs/concepts/what-is-istio/#citadel) - provides strong service-to-service and end-user authentication with built-in identity and credential management.
 
-* Blue-green deployment and Content based traffic steering
+* Blue-green deployment and content based traffic steering
 
   ![Traffic Management with Istio](https://istio.io/docs/concepts/traffic-management/TrafficManagementOverview.svg "Traffic Management with Istio")
 
@@ -758,6 +758,7 @@ Istio is an open platform-independent service mesh that provides traffic managem
 
 ```bash
 [ -f $PWD/kubeconfig.conf ] && export KUBECONFIG=${KUBECONFIG:-$PWD/kubeconfig.conf}
+kubectl get nodes -o wide
 ```
 
 Either download Istio directly from [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases) or get the latest version by using curl:
