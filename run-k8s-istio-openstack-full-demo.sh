@@ -41,8 +41,8 @@ clear
 # git clone https://github.com/ruzickap/k8s-istio-demo && cd k8s-istio-demo
 # ./run-k8s-istio-openstack-full-demo.sh
 
-sed -n '/^```bash$/,/^```$/p;/^-----$/p' README.md | \
-sed -n '/^apt update -qq$/,$p' | sed '1s/^/```bash\n/' | \
+sed -n '/^Install necessary software into the Docker container:$/,$p' README.md | \
+sed -n '/^```bash$/,/^```$/p;/^-----$/p' | \
 sed -e 's/^-----$/\
 p  ""\
 p  "################################################################################################### Press <ENTER> to continue"\

@@ -35,8 +35,8 @@ DEMO_PROMPT="${GREEN}➜ ${CYAN}$ "
 # hide the evidence
 clear
 
-sed -n '/^```bash$/,/^```$/p;/^-----$/p' README.md | \
-sed -n '/^\[ -f \$PWD\/kubeconfig.conf \] && export KUBECONFIG=/,$p' | sed '1s/^/```bash\n/' | \
+sed -n '/^## Install Istio$/,$p' README.md | \
+sed -n '/^```bash$/,/^```$/p;/^-----$/p' | \
 sed -e 's/^-----$/\
 p  ""\
 p  "################################################################################################### Press <ENTER> to continue"\
