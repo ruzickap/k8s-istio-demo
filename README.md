@@ -538,9 +538,11 @@ elasticsearchcluster.enterprises.upmc.com/elasticsearch-cluster   18m
 Install [Fluentbit](https://fluentbit.io/):
 
 ```bash
+# https://github.com/fluent/fluent-bit/issues/628
 helm install --wait stable/fluent-bit --name=fluent-bit --namespace=logging \
   --set metrics.enabled=true \
   --set backend.type=es \
+  --set backend.es.time_key='@ts' \
   --set backend.es.host=elasticsearch-elasticsearch-cluster \
   --set backend.es.tls=on \
   --set backend.es.tls_verify=off
