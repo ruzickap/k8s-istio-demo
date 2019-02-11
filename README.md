@@ -4,9 +4,9 @@
 
 [GitBook version](https://ruzickap.gitbook.io/k8s-istio-demo/)
 
-Find below few commands showing basics of [Istio](https://istio.io/)...
-
 Full asciinema demo can be found here: [https://asciinema.org/a/226632](https://asciinema.org/a/226632)
+
+Slides: [https://slides.com/ruzickap/k8s-istio-demo](https://slides.com/ruzickap/k8s-istio-demo)
 
 ## Requirements
 
