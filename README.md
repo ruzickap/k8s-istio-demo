@@ -6,7 +6,7 @@
 
 Find below few commands showing basics of [Istio](https://istio.io/)...
 
-Full asciinema demo can be found here: [https://asciinema.org/a/ijQFeXdhOvptOtCVWIthLyJvb](https://asciinema.org/a/ijQFeXdhOvptOtCVWIthLyJvb)
+Full asciinema demo can be found here: [https://asciinema.org/a/226632](https://asciinema.org/a/226632)
 
 ## Requirements
 
@@ -615,6 +615,8 @@ Istio is an open platform-independent service mesh that provides traffic managem
 * [Gateway](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#Gateway) configures a load balancer for HTTP/TCP traffic, most commonly operating at the edge of the mesh to enable ingress traffic for an application.
 
 ## Install Istio
+
+[![asciicast](https://asciinema.org/a/226632.svg)](https://asciinema.org/a/226632?t=4:05)
 
 ```bash
 [ -f $PWD/kubeconfig.conf ] && export KUBECONFIG=${KUBECONFIG:-$PWD/kubeconfig.conf}
