@@ -881,7 +881,7 @@ if test -f ../../terraform.tfstate && grep -q vms_public_ip ../../terraform.tfst
   export INGRESS_HOST=$(terraform output -json -state=../../terraform.tfstate | jq -r ".vms_public_ip.value[0]")
 fi
 export GATEWAY_URL=$INGRESS_HOST:$INGRESS_PORT
-echo "$INGRESS_PORT | $SECURE_INGRESS_PORT | $INGRESS_HOST | $GATEWAY_URL"
+echo "$INGRESS_PORT | $SECURE_INGRESS_PORT | $INGRESS_HOST | $GATEWAY_URL | http://$GATEWAY_URL/productpage"
 ```
 
 Output:
@@ -928,6 +928,7 @@ Open the browser with these pages:
 * [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
 * [http://localhost:20001](http://localhost:20001) (admin/admin)
 * [http://localhost:16686](http://localhost:16686)
+* [https://localhost:5601/app/kibana](https://localhost:5601/app/kibana)
 * [http://localhost:3000](http://localhost:3000) (Grafana -> Home -> Istio -> Istio Performance Dashboard, Istio Service Dashboard, Istio Workload Dashboard )
 
 * Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and refresh the page several times - you should see different versions of reviews shown in productpage, presented in a **round robin style** (red stars, black stars, no stars), since we haven’t yet used Istio to control the version routing.
