@@ -1475,16 +1475,20 @@ sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
 
 ## Links
 
-* [Istio Service Mesh by Mete Atamel @ .NET Conf UY v2018](https://www.youtube.com/watch?v=sh0F7FMFVSI)
+* Video:
 
-* [Liam White - Istio @ GDGReading DevFest 2018](https://www.youtube.com/watch?v=RVScqW8_liw)
+  * [Istio Service Mesh by Mete Atamel @ .NET Conf UY v2018](https://www.youtube.com/watch?v=sh0F7FMFVSI)
 
-* [Istio Service Mesh & pragmatic microservices architecture - Álex Soto](https://www.youtube.com/watch?v=OAW5rbttic0)
+  * [Liam White - Istio @ GDGReading DevFest 2018](https://www.youtube.com/watch?v=RVScqW8_liw)
 
-* [Introduction - Istio 101 Lab](https://istio101.gitbook.io/lab/workshop/)
+  * [Istio Service Mesh & pragmatic microservices architecture - Álex Soto](https://www.youtube.com/watch?v=OAW5rbttic0)
 
-* [Using Istio Workshop by Layer5.io](https://github.com/leecalcote/istio-service-mesh-workshop)
+* Pages:
 
-* [Istio Workshop by Ray Tsang](https://github.com/retroryan/istio-workshop)
+  * [Introduction - Istio 101 Lab](https://istio101.gitbook.io/lab/workshop/)
 
-* [Amazon EKS Workshop - Service Mesh with Istio](https://eksworkshop.com/servicemesh/)
+  * [Using Istio Workshop by Layer5.io](https://github.com/leecalcote/istio-service-mesh-workshop)
+
+  * [Istio Workshop by Ray Tsang](https://github.com/retroryan/istio-workshop)
+
+  * [Amazon EKS Workshop - Service Mesh with Istio](https://eksworkshop.com/servicemesh/)
