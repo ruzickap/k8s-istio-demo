@@ -60,7 +60,7 @@ markdownlint -c markdownlint_config.json README.md
 
 # Link Checks
 echo '{ "ignorePatterns": [ { "pattern": "^(http|https)://localhost" } ] }' > config.json
-markdown-link-check --config config.json ./README.md
+markdown-link-check --quiet --config config.json ./README.md
 
 # Generate ssh key if needed
 test -f $HOME/.ssh/id_rsa || ( install -m 0700 -d $HOME/.ssh && ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N "" )
