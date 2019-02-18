@@ -2,10 +2,10 @@
 dist: xenial
 
 node_js:
-  - "8"
+  - "10"
 
 env:
-  - ISTIO_VERSION="1.0.5"
+  - ISTIO_VERSION="1.0.6"
 
 script:
   - ./tests/ci_test.sh

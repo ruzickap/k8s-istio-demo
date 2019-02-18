@@ -457,7 +457,7 @@ POOLS:
     replicapool     1       0 B         0        40 GiB           0
 ```
 
-## Install ElasticSearch, Kibana, Fluentbit
+## Install ElasticSearch, Kibana, FluentBit
 
 Add [ElasticSearch operator](https://github.com/upmc-enterprises/elasticsearch-operator) to Helm:
 
@@ -535,7 +535,7 @@ NAME                                                              AGE
 elasticsearchcluster.enterprises.upmc.com/elasticsearch-cluster   18m
 ```
 
-Install [Fluentbit](https://fluentbit.io/):
+Install [FluentBit](https://fluentbit.io/):
 
 ```bash
 # https://github.com/fluent/fluent-bit/issues/628
@@ -561,7 +561,7 @@ Configure ElasticSearch:
 * Use * as the index pattern, and click "Next step.".
 * Select @timestamp as the Time Filter field name, and click "Create index pattern."
 
-Check fluent-bit installation:
+Check FluentBit installation:
 
 ```bash
 kubectl get -l app=fluent-bit svc,pods --all-namespaces -o wide
