@@ -55,12 +55,12 @@ sudo unzip -q -o /tmp/terraform_linux_amd64.zip -d /usr/local/bin/
 sudo -E npm install -g markdownlint-cli markdown-link-check > /dev/null
 
 # Markdown check
-echo '"line-length": false' > markdownlint_config.json
-markdownlint -c markdownlint_config.json README.md
+echo '"line-length": false' > /tmp/markdownlint_config.json
+markdownlint -c /tmp/markdownlint_config.json README.md
 
 # Link Checks
-echo '{ "ignorePatterns": [ { "pattern": "^(http|https)://localhost" } ] }' > config.json
-markdown-link-check --quiet --config config.json ./README.md
+echo '{ "ignorePatterns": [ { "pattern": "^(http|https)://localhost" } ] }' > /tmp/config.json
+markdown-link-check --quiet --config /tmp/config.json ./README.md
 
 # Generate ssh key if needed
 test -f $HOME/.ssh/id_rsa || ( install -m 0700 -d $HOME/.ssh && ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N "" )
