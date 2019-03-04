@@ -6,6 +6,11 @@ variable "openstack_auth_url" {
   description = "The endpoint url to connect to OpenStack"
 }
 
+variable "openstack_availability_zone" {
+  description = "Availability zone in which to create the server"
+  default = "nova"
+}
+
 variable "openstack_instance_flavor_name" {
   description = "Name of flavor in OpenStack"
 }

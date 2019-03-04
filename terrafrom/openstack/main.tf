@@ -73,6 +73,7 @@ resource "openstack_networking_floatingip_v2" "floatingip" {
 resource "openstack_compute_instance_v2" "vms" {
   count             = "${var.vm_nodes * var.environment_count}"
   name              = "${format("%s-node%02d.%02d.%s", var.prefix, count.index % var.vm_nodes + 1, count.index / var.vm_nodes + 1, var.domain)}"
+  availability_zone = "${var.openstack_availability_zone}"
   image_name        = "${var.openstack_instance_image_name}"
   flavor_name       = "${var.openstack_instance_flavor_name}"
   key_pair          = "${openstack_compute_keypair_v2.keypair.name}"
