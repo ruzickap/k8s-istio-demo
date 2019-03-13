@@ -1,8 +1,7 @@
 # We need the systemd for the kubeadm and it's default from 16.04+
 dist: xenial
 
-node_js:
-  - "10"
+node_js: 10
 
 env:
   - ISTIO_VERSION="1.0.6"
