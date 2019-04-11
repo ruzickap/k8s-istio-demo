@@ -1437,7 +1437,7 @@ sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
 
     Link: [http://localhost:20001](http://localhost:20001)
 
-* Servicegraph - [https://istio.io/docs/tasks/telemetry/servicegraph/](https://istio.io/docs/tasks/telemetry/servicegraph/)
+* Servicegraph - [https://archive.istio.io/v1.0/docs/tasks/telemetry/servicegraph/](https://archive.istio.io/v1.0/docs/tasks/telemetry/servicegraph/)
 
     ```shell
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath="{.items[0].metadata.name}") 8088:8088 &
