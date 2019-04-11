@@ -285,14 +285,15 @@ pod/rook-discover-q9xwp                   1/1     Running   0          2m14s   1
 Create your Rook cluster:
 
 ```bash
-kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/cluster.yaml
+kubectl create -f https://raw.githubusercontent.com/rook/rook/v0.9.3/cluster/examples/kubernetes/ceph/cluster.yaml
 sleep 100
 ```
 
-Get the [Toolbox](https://rook.io/docs/rook/master/ceph-toolbox.html) with ceph commands:
+Get the [Toolbox](https://raw.githubusercontent.com/rook/rook/v0.9.3/cluster/examples/kubernetes/ceph/toolbox.yaml)
+with ceph commands:
 
 ```bash
-kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/toolbox.yaml
+kubectl create -f https://raw.githubusercontent.com/rook/rook/v0.9.3/cluster/examples/kubernetes/ceph/toolbox.yaml
 sleep 300
 ```
 
@@ -339,7 +340,7 @@ pod/rook-ceph-tools-76c7d559b6-s6s4l                             1/1     Running
 Create a storage class based on the Ceph RBD volume plugin:
 
 ```bash
-kubectl create -f https://raw.githubusercontent.com/rook/rook/master/cluster/examples/kubernetes/ceph/storageclass.yaml
+kubectl create -f https://raw.githubusercontent.com/rook/rook/v0.9.3/cluster/examples/kubernetes/ceph/storageclass.yaml
 sleep 10
 ```
 
