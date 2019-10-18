@@ -1,6 +1,6 @@
 # Kubernetes with Istio demo
 
-[![Build Status](https://travis-ci.com/ruzickap/k8s-istio-demo.svg?branch=master)](https://travis-ci.com/ruzickap/k8s-istio-demo)
+![Build Status](https://github.com/ruzickap/k8s-istio-demo/workflows/checks/badge.svg)
 
 [GitBook version](https://ruzickap.gitbook.io/k8s-istio-demo/)
 
@@ -629,6 +629,7 @@ kubectl get nodes -o wide
 Either download Istio directly from [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases) or get the latest version by using curl:
 
 ```bash
+export ISTIO_VERSION="1.0.6"
 test -d files || mkdir files
 cd files
 curl -sL https://git.io/getLatestIstio | sh -
@@ -660,6 +661,7 @@ helm install --wait --name istio --namespace istio-system install/kubernetes/hel
   --set telemetry-gateway.grafanaEnabled=true \
   --set telemetry-gateway.prometheusEnabled=true \
   --set tracing.enabled=true
+sleep 30
 ```
 
 See the Istio components:
