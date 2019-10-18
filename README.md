@@ -45,7 +45,7 @@ apt-get install -y kubectl socat
 
 ### Install Kubernetes to OpenStack
 
-Install k8s to Openstack using [Terraform](https://www.terraform.io/).
+Install k8s to OpenStack using [Terraform](https://www.terraform.io/).
 
 You will need to have [Docker](https://www.docker.com/) installed.
 
@@ -165,7 +165,7 @@ At the end of the output you should see 3 IP addresses which should be accessibl
 
 #### Install k8s to the VMs
 
-Install k8s using kubeadm to the provisioned VMs:
+Install k8s using `kubeadm` to the provisioned VMs:
 
 ```bash
 ./install-k8s-kubeadm.sh
@@ -248,7 +248,7 @@ NAMESPACE     NAME                            READY   STATUS    RESTARTS   AGE
 kube-system   tiller-deploy-dbb85cb99-z4c47   1/1     Running   0          28s
 ```
 
-## Instal Rook
+## Install Rook
 
 ![Rook Architecture](https://raw.githubusercontent.com/rook/rook/master/Documentation/media/kubernetes.png "Rook Architecture")
 
@@ -260,7 +260,7 @@ helm install --wait --name rook-ceph --namespace rook-ceph-system rook-stable/ro
 sleep 110
 ```
 
-See how the rook-ceph-system should look like:
+See how the `rook-ceph-system` should look like:
 
 ```bash
 kubectl get svc,deploy,po --namespace=rook-ceph-system -o wide
@@ -290,7 +290,7 @@ sleep 100
 ```
 
 Get the [Toolbox](https://raw.githubusercontent.com/rook/rook/v0.9.3/cluster/examples/kubernetes/ceph/toolbox.yaml)
-with ceph commands:
+with Ceph commands:
 
 ```bash
 kubectl create -f https://raw.githubusercontent.com/rook/rook/v0.9.3/cluster/examples/kubernetes/ceph/toolbox.yaml
@@ -587,7 +587,7 @@ Istio is an open platform-independent service mesh that provides traffic managem
 
 [Policies and Telemetry](https://istio.io/docs/reference/config/policy-and-telemetry/): [Prometheus](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/prometheus/), [StatsD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/statsd/), [FluentD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/fluentd/) and many [others](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/)...
 
-* Istio architectue
+* Istio architecture
 
   ![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg "Istio Architecture")
 
@@ -598,24 +598,24 @@ Istio is an open platform-independent service mesh that provides traffic managem
 
 * Blue-green deployment and content based traffic steering
 
-  ![Traffic Management with Istio](https://istio.io/docs/concepts/traffic-management/TrafficManagementOverview.svg "Traffic Management with Istio")
+  ![Traffic Management with Istio](https://raw.githubusercontent.com/danielmenezesbr/istio.github.io/f90e5d3c7334edfb34656ac0b6f088f37e3dab6f/content/docs/concepts/traffic-management/TrafficManagementOverview.svg?sanitize=true "Traffic Management with Istio")
 
 * Istio Security Architecture
 
   ![Istio Security Architecture](https://istio.io/docs/concepts/security/architecture.svg "Istio Security Architecture")
 
-* [Mesh Expansion](https://istio.io/docs/setup/kubernetes/mesh-expansion/) - non-Kubernetes services(running on VMs and/or physical machines) can be added to an Istio mesh on a Kubernetes cluster. ([Istio mesh expansion on IBM Cloud Private](https://medium.com/ibm-cloud/istio-mesh-expansion-on-ibm-cloud-private-c335eabf7990))
+* [Mesh Expansion](https://istio.io/docs/examples/mesh-expansion/) - non-Kubernetes services(running on VMs and/or physical machines) can be added to an Istio mesh on a Kubernetes cluster. ([Istio mesh expansion on IBM Cloud Private](https://medium.com/ibm-cloud/istio-mesh-expansion-on-ibm-cloud-private-c335eabf7990))
 
-  ![Bookinfo Application with Istio Mesh Expansion](https://istio.io/docs/examples/integrating-vms/mesh-expansion.svg "Bookinfo Application with Istio Mesh Expansion")
+  ![Bookinfo Application with Istio Mesh Expansion](https://raw.githubusercontent.com/istio/istio.io/6e1825036edd03a5c2811d4dfc694d34837bca44/content/en/docs/examples/mesh-expansion/bookinfo-expanded/mesh-expansion.svg?sanitize=true "Bookinfo Application with Istio Mesh Expansion")
 
 * [Istio Multicluster](https://istio.io/docs/setup/kubernetes/multicluster-install/) - multiple k8s clusters managed by single Istio instance
 
 ### Istio types
 
-* [VirtualService](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#VirtualService) defines the rules that control how requests for a service are routed within an Istio service mesh.
-* [DestinationRule](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#DestinationRule) configures the set of policies to be applied to a request after VirtualService routing has occurred.
-* [ServiceEntry](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#ServiceEntry) is commonly used to enable requests to services outside of an Istio service mesh.
-* [Gateway](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#Gateway) configures a load balancer for HTTP/TCP traffic, most commonly operating at the edge of the mesh to enable ingress traffic for an application.
+* [VirtualService](https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/) defines the rules that control how requests for a service are routed within an Istio service mesh.
+* [DestinationRule](https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/) configures the set of policies to be applied to a request after VirtualService routing has occurred.
+* [ServiceEntry](https://istio.io/docs/reference/config/networking/v1alpha3/service-entry/) is commonly used to enable requests to services outside of an Istio service mesh.
+* [Gateway](https://istio.io/docs/reference/config/networking/v1alpha3/gateway/) configures a load balancer for HTTP/TCP traffic, most commonly operating at the edge of the mesh to enable ingress traffic for an application.
 
 ## Install Istio
 
@@ -852,7 +852,7 @@ kubectl describe pod -l app=productpage
 kubectl logs $(kubectl get pod -l app=productpage -o jsonpath="{.items[0].metadata.name}") istio-proxy --tail=5
 ```
 
-Define the [Istio gateway](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#Gateway) for the application:
+Define the [Istio gateway](https://istio.io/docs/reference/config/networking/v1alpha3/gateway/) for the application:
 
 ```bash
 cat samples/bookinfo/networking/bookinfo-gateway.yaml
@@ -909,7 +909,7 @@ Output:
 200
 ```
 
-Create default [destination rules](https://istio.io/docs/reference/config/istio.networking.v1alpha3/#DestinationRule) (subsets) for the Bookinfo services:
+Create default [destination rules](https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/) (subsets) for the Bookinfo services:
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/destination-rule-all.yaml
@@ -921,7 +921,7 @@ Display the destination rules:
 kubectl get destinationrules -o yaml
 ```
 
-Generate some traffic for next 5 minutes to gether some data:
+Generate some traffic for next 5 minutes to gather some data:
 
 ```bash
 siege --log=/tmp/siege --concurrent=1 -q --internet --time=5M $GATEWAY_URL/productpage &
@@ -950,7 +950,7 @@ Open the browser with these pages:
 
 [https://istio.io/docs/tasks/traffic-management/request-routing/](https://istio.io/docs/tasks/traffic-management/request-routing/)
 
-Apply the virtual services which will route all traffic to **v1** of each microservice:
+Apply the virtual services which will route all traffic to `v1` of each microservice:
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
@@ -1075,7 +1075,8 @@ spec:
         subset: v1
 ```
 
-* On the /productpage of the Bookinfo app, log in as user `jason` and refresh the browser.
+* On the `/productpage` of the Bookinfo app, log in as user `jason` and refresh
+  the browser.
 
 * Log in as another user (pick any name you wish) and refresh the browser
 
@@ -1104,7 +1105,8 @@ You can do the same with `user-agent header` or `URI` for example:
 
 [https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-delay-fault](https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-delay-fault)
 
-Inject a 7s delay between the `reviews:v2` and ratings microservices for user `jason`:
+Inject a 7 seconds delay between the `reviews:v2` and ratings microservices for
+user `jason`:
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/virtual-service-ratings-test-delay.yaml
@@ -1146,7 +1148,7 @@ spec:
         subset: v1
 ```
 
-* On the `/productpage`, log in as user `jason` adn you should see:
+* On the `/productpage`, log in as user `jason` and you should see:
 
 ```text
 Error fetching product reviews!
@@ -1155,7 +1157,7 @@ Sorry, product reviews are currently unavailable for this book.
 
 ![Bookinfo Injecting an HTTP delay fault](images/bookinfo_injecting_http_delay_fault.gif "Bookinfo Injecting an HTTP delay fault")
 
-* Open the Developer Tools menu (F12) -> Network tab - webpage actually loads in about 6 seconds.
+* Open the Developer Tools menu (F12) -> Network tab - web page actually loads in about 6 seconds.
 
 The following example introduces a **5 second delay** in **10%** of the requests to the `v1` version of the `ratings` microservice:
 
@@ -1184,7 +1186,7 @@ spec:
 
 [https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault](https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault)
 
-Let's ntroduce an HTTP abort to the ratings microservices for the test user `jason`.
+Let's introduce an HTTP abort to the ratings microservices for the test user `jason`.
 
 Create a fault injection rule to send an HTTP abort for user `jason`:
 
@@ -1454,7 +1456,7 @@ sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
 
     Link: [https://localhost:5601](https://localhost:5601)
 
-* [Cerbero](https://github.com/lmenezes/cerebro)
+* [Cerebro](https://github.com/lmenezes/cerebro)
 
     ```shell
     kubectl -n logging port-forward $(kubectl -n logging get pod -l role=cerebro -o jsonpath="{.items[0].metadata.name}") 9000:9000 &
@@ -1492,4 +1494,4 @@ sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
 
   * [Istio Workshop by Ray Tsang](https://github.com/retroryan/istio-workshop)
 
-  * [Amazon EKS Workshop - Service Mesh with Istio](https://eksworkshop.com/servicemesh/)
+  * [Amazon EKS Workshop - Service Mesh with Istio](https://eksworkshop.com/servicemesh_with_istio/)
