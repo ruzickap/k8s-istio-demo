@@ -1,6 +1,6 @@
 # Kubernetes with Istio demo
 
-![Build Status](https://github.com/ruzickap/k8s-istio-demo/workflows/checks/badge.svg)
+[![Build Status](https://github.com/ruzickap/k8s-istio-demo/workflows/checks/badge.svg)](https://github.com/ruzickap/k8s-istio-demo)
 
 [GitBook version](https://ruzickap.gitbook.io/k8s-istio-demo/)
 
