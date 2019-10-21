@@ -223,6 +223,7 @@ kube-system   pod/kube-scheduler-pruzicka-k8s-istio-demo-node01            1/1  
 Install [Helm](https://helm.sh/) binary locally:
 
 ```bash
+export DESIRED_VERSION="v2.13.0"
 curl -s https://raw.githubusercontent.com/helm/helm/master/scripts/get | bash
 ```
 
