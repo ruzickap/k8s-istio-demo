@@ -590,7 +590,7 @@ Istio is an open platform-independent service mesh that provides traffic managem
 
 * Istio architecture
 
-  ![Istio Architecture](https://istio.io/docs/concepts/what-is-istio/arch.svg "Istio Architecture")
+  ![Istio Architecture](https://raw.githubusercontent.com/istio/istio.io/60f73570f0453d1c59f5a901fc40b58ae55cacb7/content/en/docs/ops/deployment/architecture/arch.svg?sanitize=true "Istio Architecture")
 
   * [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy) - is a high-performance proxy to mediate all inbound and outbound traffic for all services in the service mesh.
   * [Pilot](https://istio.io/docs/concepts/what-is-istio/#pilot) - provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing.
