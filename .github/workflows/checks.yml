@@ -12,6 +12,9 @@ jobs:
     steps:
     - uses: actions/checkout@v1
 
+    - name: "Update repositories"
+      run: sudo apt update
+
     - name: "Run tests"
       run: |
         sudo apt install -y pv siege
