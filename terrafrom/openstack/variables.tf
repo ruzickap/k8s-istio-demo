@@ -8,7 +8,7 @@ variable "openstack_auth_url" {
 
 variable "openstack_availability_zone" {
   description = "Availability zone in which to create the server"
-  default = "nova"
+  default     = "nova"
 }
 
 variable "openstack_instance_flavor_name" {
@@ -21,22 +21,22 @@ variable "openstack_instance_image_name" {
 
 variable "openstack_keypair_public_key" {
   description = "SSH Public key location"
-  default = "~/.ssh/id_rsa.pub"
+  default     = "~/.ssh/id_rsa.pub"
 }
 
 variable "openstack_networking_network_external_network_name" {
   description = "External network name"
-  default = "public"
+  default     = "public"
 }
 
 variable "openstack_networking_subnet_cidr" {
   description = "CIDR for new network where all VMs will be connected"
-  default = "192.168.250.0/24"
+  default     = "192.168.250.0/24"
 }
 
 variable "openstack_networking_subnet_dns_nameservers" {
   description = "DNS servers"
-  default = ["8.8.8.8", "8.8.4.4"]
+  default     = ["8.8.8.8", "8.8.4.4"]
 }
 
 variable "openstack_networking_floatingip" {

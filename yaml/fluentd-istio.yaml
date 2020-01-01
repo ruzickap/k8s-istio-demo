@@ -34,6 +34,6 @@ metadata:
 spec:
   match: "true" # match for all requests
   actions:
-   - handler: handler.fluentd
-     instances:
-     - newlog.logentry
+    - handler: handler.fluentd
+      instances:
+        - newlog.logentry

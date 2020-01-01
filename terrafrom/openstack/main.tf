@@ -58,9 +58,9 @@ resource "openstack_networking_router_v2" "private-router" {
 
 # Create router interface for private subnet
 resource "openstack_networking_router_interface_v2" "router-interface" {
-  count      = "${var.environment_count}"
-  router_id  = "${element(openstack_networking_router_v2.private-router.*.id, count.index)}"
-  subnet_id  = "${element(openstack_networking_subnet_v2.private-subnet.*.id, count.index)}"
+  count     = "${var.environment_count}"
+  router_id = "${element(openstack_networking_router_v2.private-router.*.id, count.index)}"
+  subnet_id = "${element(openstack_networking_subnet_v2.private-subnet.*.id, count.index)}"
 }
 
 # Create floating IP for nodes
@@ -80,7 +80,7 @@ resource "openstack_compute_instance_v2" "vms" {
   security_groups   = ["${openstack_networking_secgroup_v2.secgroup.name}"]
 
   network {
-    uuid           = "${element(openstack_networking_network_v2.private-network.*.id, count.index / var.vm_nodes )}"
+    uuid           = "${element(openstack_networking_network_v2.private-network.*.id, count.index / var.vm_nodes)}"
     fixed_ip_v4    = "${cidrhost(var.openstack_networking_subnet_cidr, var.vm_nodes_network_private_ip_last_octet + count.index % var.vm_nodes + 1)}"
     access_network = true
   }
@@ -95,18 +95,18 @@ resource "openstack_compute_floatingip_associate_v2" "floatingip-associate" {
 
 # Wait for VMs to be fully up (accessible by ssh)
 resource "null_resource" "vms" {
-  count             = "${var.vm_nodes * var.environment_count}"
-  depends_on        = ["openstack_compute_floatingip_associate_v2.floatingip-associate"]
+  count      = "${var.vm_nodes * var.environment_count}"
+  depends_on = ["openstack_compute_floatingip_associate_v2.floatingip-associate"]
 
   connection {
     type = "ssh"
     host = "${element(openstack_networking_floatingip_v2.floatingip.*.address, count.index)}"
     #private_key = "${file("~/.ssh/id_rsa")}"
-    user = "${var.username}"
+    user  = "${var.username}"
     agent = true
   }
   provisioner "remote-exec" {
-    inline = [ ]
+    inline = []
   }
 }
 
