@@ -10,7 +10,8 @@ Slides: [https://slides.com/ruzickap/k8s-istio-demo](https://slides.com/ruzickap
 
 ## Requirements
 
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) (kubernetes-client package)
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
+  (kubernetes-client package)
 * [Helm](https://helm.sh/)
 * [Siege](https://github.com/JoeDog/siege) (siege package)
 * [Terraform](https://www.terraform.io/)
@@ -21,7 +22,8 @@ or just
 
 ## Install Kubernetes
 
-The following sections will show you how to install k8s to [OpenStack](https://www.openstack.org/) or how to use [Minikube](https://kubernetes.io/docs/setup/minikube/).
+The following sections will show you how to install k8s to [OpenStack](https://www.openstack.org/)
+or how to use [Minikube](https://kubernetes.io/docs/setup/minikube/).
 
 ### Use Minikube to start the Kubernetes cluster
 
@@ -51,7 +53,9 @@ You will need to have [Docker](https://www.docker.com/) installed.
 
 #### Prepare the working environment inside Docker
 
-You can skip this part if you have [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), [Helm](https://helm.sh/), [Siege](https://github.com/JoeDog/siege) and [Terraform](https://www.terraform.io/) installed.
+You can skip this part if you have [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/),
+[Helm](https://helm.sh/), [Siege](https://github.com/JoeDog/siege) and
+[Terraform](https://www.terraform.io/) installed.
 
 Run Ubuntu docker image and mount the directory there:
 
@@ -161,7 +165,8 @@ vms_public_ip = [
 ]
 ```
 
-At the end of the output you should see 3 IP addresses which should be accessible by ssh using your public key `~/.ssh/id_rsa.pub`.
+At the end of the output you should see 3 IP addresses which should be
+accessible by ssh using your public key `~/.ssh/id_rsa.pub`.
 
 #### Install k8s to the VMs
 
@@ -251,9 +256,11 @@ kube-system   tiller-deploy-dbb85cb99-z4c47   1/1     Running   0          28s
 
 ## Install Rook
 
-![Rook Architecture](https://raw.githubusercontent.com/rook/rook/master/Documentation/media/kubernetes.png "Rook Architecture")
+![Rook Architecture](https://raw.githubusercontent.com/rook/rook/master/Documentation/media/kubernetes.png
+"Rook Architecture")
 
-Install [Rook](https://rook.io/) Operator ([Ceph](https://ceph.com/) storage for k8s):
+Install [Rook](https://rook.io/) Operator ([Ceph](https://ceph.com/)
+storage for k8s):
 
 ```bash
 helm repo add rook-stable https://charts.rook.io/stable
@@ -461,7 +468,8 @@ POOLS:
 
 ## Install ElasticSearch, Kibana, FluentBit
 
-Add [ElasticSearch operator](https://github.com/upmc-enterprises/elasticsearch-operator) to Helm:
+Add [ElasticSearch operator](https://github.com/upmc-enterprises/elasticsearch-operator)
+to Helm:
 
 ```bash
 helm repo add es-operator https://raw.githubusercontent.com/upmc-enterprises/elasticsearch-operator/master/charts/
@@ -559,9 +567,11 @@ kubectl -n logging port-forward $(kubectl -n logging get pod -l role=kibana -o j
 
 Configure ElasticSearch:
 
-* Navigate to the [Kibana UI](https://localhost:5601) and click the "Set up index patterns" in the top right.
+* Navigate to the [Kibana UI](https://localhost:5601) and click the
+  "Set up index patterns" in the top right.
 * Use * as the index pattern, and click "Next step.".
-* Select @timestamp as the Time Filter field name, and click "Create index pattern."
+* Select @timestamp as the Time Filter field name, and click
+  "Create index pattern."
 
 Check FluentBit installation:
 
@@ -583,40 +593,70 @@ logging     pod/fluent-bit-fluent-bit-zfkqr   1/1     Running   0          80s  
 
 ## Istio architecture and features
 
-Istio is an open platform-independent service mesh that provides traffic management, policy enforcement, and telemetry collection
-(layer 7 firewall + loadbalancer, ingress, blocking outgoing traffic, tracing, monitoring, logging).
+Istio is an open platform-independent service mesh that provides traffic
+management, policy enforcement, and telemetry collection
+(layer 7 firewall + loadbalancer, ingress, blocking outgoing traffic, tracing,
+monitoring, logging).
 
-[Policies and Telemetry](https://istio.io/docs/reference/config/policy-and-telemetry/): [Prometheus](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/prometheus/), [StatsD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/statsd/), [FluentD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/fluentd/) and many [others](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/)...
+[Policies and Telemetry](https://istio.io/docs/reference/config/policy-and-telemetry/):
+[Prometheus](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/prometheus/),
+[StatsD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/statsd/),
+[FluentD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/fluentd/)
+and many [others](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/)...
 
 * Istio architecture
 
-  ![Istio Architecture](https://raw.githubusercontent.com/istio/istio.io/60f73570f0453d1c59f5a901fc40b58ae55cacb7/content/en/docs/ops/deployment/architecture/arch.svg?sanitize=true "Istio Architecture")
+  ![Istio Architecture](https://raw.githubusercontent.com/istio/istio.io/60f73570f0453d1c59f5a901fc40b58ae55cacb7/content/en/docs/ops/deployment/architecture/arch.svg?sanitize=true
+  "Istio Architecture")
 
-  * [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy) - is a high-performance proxy to mediate all inbound and outbound traffic for all services in the service mesh.
-  * [Pilot](https://istio.io/docs/concepts/what-is-istio/#pilot) - provides service discovery for the Envoy sidecars, traffic management capabilities for intelligent routing.
-  * [Mixer](https://istio.io/docs/concepts/what-is-istio/#mixer) - enforces access control and usage policies across the service mesh, and collects telemetry data from the Envoy proxy and other services.
-  * [Citadel](https://istio.io/docs/concepts/what-is-istio/#citadel) - provides strong service-to-service and end-user authentication with built-in identity and credential management.
+  * [Envoy](https://istio.io/docs/concepts/what-is-istio/#envoy) - is a
+    high-performance proxy to mediate all inbound and outbound traffic for all
+    services in the service mesh.
+  * [Pilot](https://istio.io/docs/concepts/what-is-istio/#pilot) - provides
+    service discovery for the Envoy sidecars, traffic management capabilities
+    for intelligent routing.
+  * [Mixer](https://istio.io/docs/concepts/what-is-istio/#mixer) - enforces
+    access control and usage policies across the service mesh, and collects
+    telemetry data from the Envoy proxy and other services.
+  * [Citadel](https://istio.io/docs/concepts/what-is-istio/#citadel) - provides
+    strong service-to-service and end-user authentication with built-in identity
+    and credential management.
 
 * Blue-green deployment and content based traffic steering
 
-  ![Traffic Management with Istio](https://raw.githubusercontent.com/danielmenezesbr/istio.github.io/f90e5d3c7334edfb34656ac0b6f088f37e3dab6f/content/docs/concepts/traffic-management/TrafficManagementOverview.svg?sanitize=true "Traffic Management with Istio")
+  ![Traffic Management with Istio](https://raw.githubusercontent.com/danielmenezesbr/istio.github.io/f90e5d3c7334edfb34656ac0b6f088f37e3dab6f/content/docs/concepts/traffic-management/TrafficManagementOverview.svg?sanitize=true
+  "Traffic Management with Istio")
 
 * Istio Security Architecture
 
-  ![Istio Security Architecture](https://istio.io/docs/concepts/security/architecture.svg "Istio Security Architecture")
+  ![Istio Security Architecture](https://istio.io/docs/concepts/security/architecture.svg
+  "Istio Security Architecture")
 
-* [Mesh Expansion](https://istio.io/docs/examples/mesh-expansion/) - non-Kubernetes services(running on VMs and/or physical machines) can be added to an Istio mesh on a Kubernetes cluster. ([Istio mesh expansion on IBM Cloud Private](https://medium.com/ibm-cloud/istio-mesh-expansion-on-ibm-cloud-private-c335eabf7990))
+* [Mesh Expansion](https://istio.io/docs/examples/mesh-expansion/) -
+  non-Kubernetes services (running on VMs and/or physical machines) can be
+  added to an Istio mesh on a Kubernetes cluster.
+  ([Istio mesh expansion on IBM Cloud Private](https://medium.com/ibm-cloud/istio-mesh-expansion-on-ibm-cloud-private-c335eabf7990))
 
-  ![Bookinfo Application with Istio Mesh Expansion](https://raw.githubusercontent.com/istio/istio.io/6e1825036edd03a5c2811d4dfc694d34837bca44/content/en/docs/examples/mesh-expansion/bookinfo-expanded/mesh-expansion.svg?sanitize=true "Bookinfo Application with Istio Mesh Expansion")
+  ![Bookinfo Application with Istio Mesh Expansion](https://raw.githubusercontent.com/istio/istio.io/6e1825036edd03a5c2811d4dfc694d34837bca44/content/en/docs/examples/mesh-expansion/bookinfo-expanded/mesh-expansion.svg?sanitize=true
+  "Bookinfo Application with Istio Mesh Expansion")
 
-* [Istio Multicluster](https://istio.io/docs/setup/kubernetes/multicluster-install/) - multiple k8s clusters managed by single Istio instance
+* [Istio Multicluster](https://istio.io/docs/setup/kubernetes/multicluster-install/)
+  \- multiple k8s clusters managed by single Istio instance
 
 ### Istio types
 
-* [VirtualService](https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/) defines the rules that control how requests for a service are routed within an Istio service mesh.
-* [DestinationRule](https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/) configures the set of policies to be applied to a request after VirtualService routing has occurred.
-* [ServiceEntry](https://istio.io/docs/reference/config/networking/v1alpha3/service-entry/) is commonly used to enable requests to services outside of an Istio service mesh.
-* [Gateway](https://istio.io/docs/reference/config/networking/v1alpha3/gateway/) configures a load balancer for HTTP/TCP traffic, most commonly operating at the edge of the mesh to enable ingress traffic for an application.
+* [VirtualService](https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/)
+  defines the rules that control how requests for a service are routed within
+  an Istio service mesh.
+* [DestinationRule](https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/)
+  configures the set of policies to be applied to a request after VirtualService
+  routing has occurred.
+* [ServiceEntry](https://istio.io/docs/reference/config/networking/v1alpha3/service-entry/)
+  is commonly used to enable requests to services outside of an Istio service
+  mesh.
+* [Gateway](https://istio.io/docs/reference/config/networking/v1alpha3/gateway/)
+  configures a load balancer for HTTP/TCP traffic, most commonly operating
+  at the edge of the mesh to enable ingress traffic for an application.
 
 ## Install Istio
 
@@ -627,7 +667,8 @@ Istio is an open platform-independent service mesh that provides traffic managem
 kubectl get nodes -o wide
 ```
 
-Either download Istio directly from [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases) or get the latest version by using curl:
+Either download Istio directly from [https://github.com/istio/istio/releases](https://github.com/istio/istio/releases)
+or get the latest version by using curl:
 
 ```bash
 export ISTIO_VERSION="1.0.6"
@@ -786,24 +827,32 @@ kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=se
 
 The Bookinfo application is broken into four separate microservices:
 
-* `productpage` - the productpage microservice calls the details and reviews microservices to populate the page.
+* `productpage` - the productpage microservice calls the details and reviews
+  microservices to populate the page.
 * `details` - the details microservice contains book information.
-* `reviews` - the reviews microservice contains book reviews. It also calls the ratings microservice.
-* `ratings` - the ratings microservice contains book ranking information that accompanies a book review.
+* `reviews` - the reviews microservice contains book reviews. It also calls
+  the ratings microservice.
+* `ratings` - the ratings microservice contains book ranking information that
+  accompanies a book review.
 
 There are 3 versions of the `reviews` microservice:
 
 * Version `v1` - doesn’t call the **ratings service**.
-* Version `v2` - calls the ratings service, and displays each rating as 1 to 5 **black stars**.
-* Version `v3` - calls the ratings service, and displays each rating as 1 to 5 **red stars**.
+* Version `v2` - calls the ratings service, and displays each rating as 1 to
+  5 **black stars**.
+* Version `v3` - calls the ratings service, and displays each rating as 1 to
+  5 **red stars**.
 
 [Bookinfo](https://istio.io/docs/examples/bookinfo/) application architecture
 
-![Application Architecture without Istio](https://istio.io/docs/examples/bookinfo/noistio.svg "Application Architecture without Istio")
+![Application Architecture without Istio](https://istio.io/docs/examples/bookinfo/noistio.svg
+"Application Architecture without Istio")
 
-![Application Architecture with Istio](https://istio.io/docs/examples/bookinfo/withistio.svg "Application Architecture with Istio")
+![Application Architecture with Istio](https://istio.io/docs/examples/bookinfo/withistio.svg
+"Application Architecture with Istio")
 
-Deploy the demo of [Bookinfo](https://istio.io/docs/examples/bookinfo/) application:
+Deploy the demo of [Bookinfo](https://istio.io/docs/examples/bookinfo/)
+application:
 
 ```bash
 kubectl apply -f samples/bookinfo/platform/kube/bookinfo.yaml
@@ -848,14 +897,16 @@ pod/reviews-v2-7fc9bb6dcf-snshx           2/2     Running   0          4m18s   1
 pod/reviews-v3-c995979bc-wcql9            2/2     Running   0          4m18s   10.244.0.12   pruzicka-k8s-istio-demo-node01   <none>           <none>
 ```
 
-Check the container details - you should see also container `istio-proxy` next to `productpage`:
+Check the container details - you should see also container `istio-proxy` next
+to `productpage`:
 
 ```bash
 kubectl describe pod -l app=productpage
 kubectl logs $(kubectl get pod -l app=productpage -o jsonpath="{.items[0].metadata.name}") istio-proxy --tail=5
 ```
 
-Define the [Istio gateway](https://istio.io/docs/reference/config/networking/v1alpha3/gateway/) for the application:
+Define the [Istio gateway](https://istio.io/docs/reference/config/networking/v1alpha3/gateway/)
+for the application:
 
 ```bash
 cat samples/bookinfo/networking/bookinfo-gateway.yaml
@@ -912,7 +963,8 @@ Output:
 200
 ```
 
-Create default [destination rules](https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/) (subsets) for the Bookinfo services:
+Create default [destination rules](https://istio.io/docs/reference/config/networking/v1alpha3/destination-rule/)
+(subsets) for the Bookinfo services:
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/destination-rule-all.yaml
@@ -937,9 +989,15 @@ Open the browser with these pages:
 * [http://localhost:20001](http://localhost:20001) (admin/admin)
 * [http://localhost:16686](http://localhost:16686)
 * [https://localhost:5601/app/kibana](https://localhost:5601/app/kibana)
-* [http://localhost:3000](http://localhost:3000) (Grafana -> Home -> Istio -> Istio Performance Dashboard, Istio Service Dashboard, Istio Workload Dashboard )
+* [http://localhost:3000](http://localhost:3000) (Grafana -> Home -> Istio ->
+  Istio Performance Dashboard, Istio Service Dashboard,
+  Istio Workload Dashboard)
 
-* Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and refresh the page several times - you should see different versions of reviews shown in productpage, presented in a **round robin style** (red stars, black stars, no stars), since we haven’t yet used Istio to control the version routing.
+* Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and
+  refresh the page several times - you should see different versions of reviews
+  shown in productpage, presented in a **round robin style** (red stars, black
+  stars, no stars), since we haven’t yet used Istio to control the version
+  routing.
 
 ![Bookinfo v1, v3, v2](images/bookinfo_v1_v3_v2.gif "Bookinfo v1, v3, v2")
 
@@ -953,7 +1011,8 @@ Open the browser with these pages:
 
 [https://istio.io/docs/tasks/traffic-management/request-routing/](https://istio.io/docs/tasks/traffic-management/request-routing/)
 
-Apply the virtual services which will route all traffic to `v1` of each microservice:
+Apply the virtual services which will route all traffic to `v1` of each
+microservice:
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
@@ -1028,7 +1087,9 @@ spec:
         subset: v1
 ```
 
-* Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and notice that the reviews part of the page displays with no rating stars, no matter how many times you refresh.
+* Open the Bookinfo site in your browser `http://$GATEWAY_URL/productpage` and
+  notice that the reviews part of the page displays with no rating stars,
+  no matter how many times you refresh.
 
 ![Bookinfo v1](images/bookinfo_v1.jpg "Bookinfo v1")
 
@@ -1038,7 +1099,9 @@ spec:
 
 [https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity](https://istio.io/docs/tasks/traffic-management/request-routing/#route-based-on-user-identity)
 
-All traffic from a user named `jason` will be routed to the service `reviews:v2` by forwarding HTTP requests with custom end-user header to the appropriate reviews service.
+All traffic from a user named `jason` will be routed to the service `reviews:v2`
+by forwarding HTTP requests with custom end-user header to the appropriate
+reviews service.
 
 Enable user-based routing:
 
@@ -1158,11 +1221,14 @@ Error fetching product reviews!
 Sorry, product reviews are currently unavailable for this book.
 ```
 
-![Bookinfo Injecting an HTTP delay fault](images/bookinfo_injecting_http_delay_fault.gif "Bookinfo Injecting an HTTP delay fault")
+![Bookinfo Injecting an HTTP delay fault](images/bookinfo_injecting_http_delay_fault.gif
+"Bookinfo Injecting an HTTP delay fault")
 
-* Open the Developer Tools menu (F12) -> Network tab - web page actually loads in about 6 seconds.
+* Open the Developer Tools menu (F12) -> Network tab - web page actually loads
+  in about 6 seconds.
 
-The following example introduces a **5 second delay** in **10%** of the requests to the `v1` version of the `ratings` microservice:
+The following example introduces a **5 second delay** in **10%** of the requests
+to the `v1` version of the `ratings` microservice:
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1189,7 +1255,8 @@ spec:
 
 [https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault](https://istio.io/docs/tasks/traffic-management/fault-injection/#injecting-an-http-abort-fault)
 
-Let's introduce an HTTP abort to the ratings microservices for the test user `jason`.
+Let's introduce an HTTP abort to the ratings microservices for the test
+user `jason`.
 
 Create a fault injection rule to send an HTTP abort for user `jason`:
 
@@ -1233,15 +1300,19 @@ spec:
         subset: v1
 ```
 
-* On the `/productpage`, log in as user `jason` - the page loads immediately and the product ratings not available message appears.
+* On the `/productpage`, log in as user `jason` - the page loads immediately
+  and the product ratings not available message appears.
 
-![Bookinfo Injecting an HTTP abort fault](images/bookinfo_injecting_http_abort_fault.gif "Bookinfo Injecting an HTTP abort fault")
+![Bookinfo Injecting an HTTP abort fault](images/bookinfo_injecting_http_abort_fault.gif
+"Bookinfo Injecting an HTTP abort fault")
 
 * Check the flows in Kiali graph
 
-![Injecting an HTTP abort fault Kiali Graph](images/istio_kiali_injecting_an_http_abort_fault.gif "Injecting an HTTP abort fault Kiali Graph")
+![Injecting an HTTP abort fault Kiali Graph](images/istio_kiali_injecting_an_http_abort_fault.gif
+"Injecting an HTTP abort fault Kiali Graph")
 
-The following example returns an **HTTP 400** error code for **10%** of the requests to the `ratings` service `v1`:
+The following example returns an **HTTP 400** error code for **10%** of
+the requests to the `ratings` service `v1`:
 
 ```yaml
 apiVersion: networking.istio.io/v1alpha3
@@ -1268,9 +1339,13 @@ spec:
 
 [https://istio.io/docs/tasks/traffic-management/traffic-shifting/#apply-weight-based-routing](https://istio.io/docs/tasks/traffic-management/traffic-shifting/#apply-weight-based-routing)
 
-In **Canary Deployments**, newer versions of services are incrementally rolled out to users to minimize the risk and impact of any bugs introduced by the newer version.
+In **Canary Deployments**, newer versions of services are incrementally rolled
+out to users to minimize the risk and impact of any bugs introduced by the newer
+version.
 
-Route a percentage of traffic to one service or another - send **%50** of traffic to `reviews:v1` and **%50** to `reviews:v3` and finally complete the migration by sending %100 of traffic to `reviews:v3`.
+Route a percentage of traffic to one service or another - send **%50**
+of traffic to `reviews:v1` and **%50** to `reviews:v3` and finally complete
+the migration by sending %100 of traffic to `reviews:v3`.
 
 Route all traffic to the `reviews:v1` version of each microservice:
 
@@ -1313,21 +1388,25 @@ spec:
       weight: 50
 ```
 
-* Refresh the `/productpage` in your browser and you now see **red** colored star ratings approximately **50%** of the time.
+* Refresh the `/productpage` in your browser and you now see **red** colored
+  star ratings approximately **50%** of the time.
 
 * Check the flows in Kiali graph
 
-![Weight-based routing Kiali Graph](images/istio_kiali_weight-based_routing.gif "Weight-based routing Kiali Graph")
+![Weight-based routing Kiali Graph](images/istio_kiali_weight-based_routing.gif
+"Weight-based routing Kiali Graph")
 
 -----
 
-Assuming you decide that the `reviews:v3` microservice is stable, you can route **100%** of the traffic to `reviews:v3` by applying this virtual service.
+Assuming you decide that the `reviews:v3` microservice is stable, you can route
+**100%** of the traffic to `reviews:v3` by applying this virtual service.
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
 ```
 
-* When you refresh the `/productpage` you will always see book reviews with **red** colored star ratings for **each** review.
+* When you refresh the `/productpage` you will always see book reviews with
+  **red** colored star ratings for **each** review.
 
 ![Bookinfo v3](images/bookinfo_v3.jpg "Bookinfo v3")
 
@@ -1339,9 +1418,11 @@ kubectl apply -f samples/bookinfo/networking/virtual-service-reviews-v3.yaml
 
 Mirroring sends a copy of live traffic to a mirrored service.
 
-First all traffic will go to `reviews:v1`, then the rule will be applied to mirror a portion of traffic to `reviews:v2`.
+First all traffic will go to `reviews:v1`, then the rule will be applied
+to mirror a portion of traffic to `reviews:v2`.
 
-Apply the virtual services which will route all traffic to `v1` of each microservice:
+Apply the virtual services which will route all traffic to `v1` of each
+microservice:
 
 ```bash
 kubectl apply -f samples/bookinfo/networking/virtual-service-all-v1.yaml
@@ -1396,7 +1477,8 @@ kubectl logs $(kubectl get pod -l app=reviews,version=v2 -o jsonpath="{.items[0]
 
 ## Cleanup
 
-* Remove the Bookinfo application and clean it up (delete the routing rules and terminate the application pods):
+* Remove the Bookinfo application and clean it up (delete the routing rules
+  and terminate the application pods):
 
 ```bash
 # Clean everything - remove port-forward, Bookinfo application, all Istio VirtualServices, Gateways, DestinationRules
@@ -1449,7 +1531,8 @@ sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
     kubectl -n istio-system port-forward $(kubectl -n istio-system get pod -l app=servicegraph -o jsonpath="{.items[0].metadata.name}") 8088:8088 &
     ```
 
-    Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html), [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
+    Link: [http://localhost:8088/force/forcegraph.html](http://localhost:8088/force/forcegraph.html),
+    [http://localhost:8088/dotviz](http://localhost:8088/dotviz)
 
 * [Kibana](https://www.elastic.co/products/kibana)
 
@@ -1475,7 +1558,9 @@ sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
 
     Login: admin
 
-    Password: `kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o yaml | grep "password:" | awk '{print $2}' | base64 --decode`
+    Password:
+    `kubectl -n rook-ceph get secret rook-ceph-dashboard-password -o yaml |
+    grep "password:" | awk '{print $2}' | base64 --decode`
 
     Link: [https://localhost:8443](https://localhost:8443)
 
