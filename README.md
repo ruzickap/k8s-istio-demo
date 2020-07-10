@@ -629,7 +629,7 @@ and many [others](https://istio.io/docs/reference/config/policy-and-telemetry/ad
 
 * Istio Security Architecture
 
-  ![Istio Security Architecture](https://istio.io/docs/concepts/security/architecture.svg
+  ![Istio Security Architecture](https://raw.githubusercontent.com/istio/istio.io/a7382bef813024cb3f9d1c95b898987578cf761a/archive/v1.0/docs/concepts/security/architecture.svg?sanitize=true
   "Istio Security Architecture")
 
 * [Mesh Expansion](https://istio.io/docs/examples/mesh-expansion/) -
@@ -845,10 +845,7 @@ There are 3 versions of the `reviews` microservice:
 
 [Bookinfo](https://istio.io/docs/examples/bookinfo/) application architecture
 
-![Application Architecture without Istio](https://istio.io/docs/examples/bookinfo/noistio.svg
-"Application Architecture without Istio")
-
-![Application Architecture with Istio](https://istio.io/docs/examples/bookinfo/withistio.svg
+![Application Architecture with Istio](https://raw.githubusercontent.com/istio/istio.io/7bf371365e4a16a9a13c0e79355fe1eac7f8f99f/content/docs/examples/bookinfo/withistio.svg?sanitize=true
 "Application Architecture with Istio")
 
 Deploy the demo of [Bookinfo](https://istio.io/docs/examples/bookinfo/)
