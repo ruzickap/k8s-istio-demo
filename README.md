@@ -119,7 +119,7 @@ Modify the Terraform variable file if needed:
 ```bash
 OPENSTACK_PASSWORD=${OPENSTACK_PASSWORD:-default}
 
-cat > terrafrom/openstack/terraform.tfvars << EOF
+cat > terraform/openstack/terraform.tfvars << EOF
 openstack_auth_url                          = "https://ic-us.ssl.mirantis.net:5000/v3"
 openstack_instance_flavor_name              = "compact.dbs"
 openstack_instance_image_name               = "bionic-server-cloudimg-amd64-20190119"
@@ -135,13 +135,13 @@ EOF
 Download Terraform components:
 
 ```bash
-terraform init -var-file=terrafrom/openstack/terraform.tfvars terrafrom/openstack
+terraform init -var-file=terraform/openstack/terraform.tfvars terraform/openstack
 ```
 
 Create VMs in OpenStack:
 
 ```bash
-terraform apply -auto-approve -var-file=terrafrom/openstack/terraform.tfvars terrafrom/openstack
+terraform apply -auto-approve -var-file=terraform/openstack/terraform.tfvars terraform/openstack
 ```
 
 Show Terraform output:

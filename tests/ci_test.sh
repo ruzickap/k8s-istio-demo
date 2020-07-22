@@ -76,8 +76,8 @@ openstack_auth_url             = "test"
 openstack_instance_flavor_name = "test"
 EOF
 
-terraform init     -var-file=terraform.tfvars terrafrom/openstack
-terraform validate -var-file=terraform.tfvars terrafrom/openstack
+terraform init     -var-file=terraform.tfvars terraform/openstack
+terraform validate -var-file=terraform.tfvars terraform/openstack
 
 sudo swapoff -a
 
