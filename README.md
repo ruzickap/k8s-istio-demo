@@ -1547,7 +1547,7 @@ sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
 
     Link: [http://localhost:9000](http://localhost:9000)
 
-* [Ceph Dashboard](http://docs.ceph.com/docs/mimic/mgr/dashboard/)
+* [Ceph Dashboard](https://docs.ceph.com/en/latest/mgr/dashboard/)
 
     ```shell
     kubectl -n rook-ceph port-forward $(kubectl -n rook-ceph get pod -l app=rook-ceph-mgr -o jsonpath="{.items[0].metadata.name}") 8443:8443 &
