@@ -598,11 +598,11 @@ management, policy enforcement, and telemetry collection
 (layer 7 firewall + loadbalancer, ingress, blocking outgoing traffic, tracing,
 monitoring, logging).
 
-[Policies and Telemetry](https://istio.io/docs/reference/config/policy-and-telemetry/):
-[Prometheus](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/prometheus/),
-[StatsD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/statsd/),
-[FluentD](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/fluentd/)
-and many [others](https://istio.io/docs/reference/config/policy-and-telemetry/adapters/)...
+[Policies and Telemetry](https://istio.io/v1.3/docs/reference/config/policy-and-telemetry/):
+[Prometheus](https://istio.io/v1.3/docs/reference/config/policy-and-telemetry/adapters/prometheus/),
+[StatsD](https://istio.io/v1.3/docs/reference/config/policy-and-telemetry/adapters/statsd/),
+[FluentD](https://istio.io/v1.3/docs/reference/config/policy-and-telemetry/adapters/fluentd/)
+and many [others](https://istio.io/v1.3/docs/reference/config/policy-and-telemetry/adapters/)...
 
 * Istio architecture
 
@@ -632,7 +632,7 @@ and many [others](https://istio.io/docs/reference/config/policy-and-telemetry/ad
   ![Istio Security Architecture](https://raw.githubusercontent.com/istio/istio.io/a7382bef813024cb3f9d1c95b898987578cf761a/archive/v1.0/docs/concepts/security/architecture.svg?sanitize=true
   "Istio Security Architecture")
 
-* [Mesh Expansion](https://istio.io/docs/examples/mesh-expansion/) -
+* [Mesh Expansion](https://istio.io/v1.3/docs/examples/mesh-expansion/) -
   non-Kubernetes services (running on VMs and/or physical machines) can be
   added to an Istio mesh on a Kubernetes cluster.
   ([Istio mesh expansion on IBM Cloud Private](https://medium.com/ibm-cloud/istio-mesh-expansion-on-ibm-cloud-private-c335eabf7990))
