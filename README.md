@@ -259,7 +259,7 @@ kube-system   tiller-deploy-dbb85cb99-z4c47   1/1     Running   0          28s
 ![Rook Architecture](https://raw.githubusercontent.com/rook/rook/master/Documentation/media/kubernetes.png
 "Rook Architecture")
 
-Install [Rook](https://rook.io/) Operator ([Ceph](https://ceph.com/)
+Install [Rook](https://rook.io/) Operator ([Ceph](https://ceph.com/en/)
 storage for k8s):
 
 ```bash
