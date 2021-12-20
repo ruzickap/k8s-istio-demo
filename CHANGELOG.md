@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.1.1](https://github.com/ruzickap/k8s-istio-demo/compare/v0.1.0...v0.1.1) (2021-12-20)
+
+- Fix linter issues [`#10`](https://github.com/ruzickap/k8s-istio-demo/pull/10)
+- Upgrade GH Actions versions [`#9`](https://github.com/ruzickap/k8s-istio-demo/pull/9)
+- Fix old Ceph Dashboard link [`#8`](https://github.com/ruzickap/k8s-istio-demo/pull/8)
+
 ## [v0.1.0](https://github.com/ruzickap/k8s-istio-demo/compare/v0.0.1...v0.1.0) (2020-09-17)
 
 - GH Action version update [`#6`](https://github.com/ruzickap/k8s-istio-demo/pull/6)
