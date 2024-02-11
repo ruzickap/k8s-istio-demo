@@ -19,10 +19,10 @@ jobs:
   terraform-check:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5 # v2
 
       - name: Terraform Format
-        uses: hashicorp/terraform-github-actions@v0.8.0
+        uses: hashicorp/terraform-github-actions@b2ca17c0c25198c67c668c37edcbc45ca086a91e # v0.8.0
         with:
           tf_actions_version: 0.12.29
           tf_actions_subcommand: fmt
@@ -31,7 +31,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Terraform Init
-        uses: hashicorp/terraform-github-actions@v0.8.0
+        uses: hashicorp/terraform-github-actions@b2ca17c0c25198c67c668c37edcbc45ca086a91e # v0.8.0
         with:
           tf_actions_version: 0.12.29
           tf_actions_subcommand: init
@@ -40,7 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Terraform Validate
-        uses: hashicorp/terraform-github-actions@v0.8.0
+        uses: hashicorp/terraform-github-actions@b2ca17c0c25198c67c668c37edcbc45ca086a91e # v0.8.0
         with:
           tf_actions_version: 0.12.29
           tf_actions_subcommand: validate
