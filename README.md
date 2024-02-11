@@ -84,7 +84,7 @@ Install [Terraform](https://www.terraform.io/):
 
 ```bash
 TERRAFORM_LATEST_VERSION=$(curl -s https://checkpoint-api.hashicorp.com/v1/check/terraform | jq -r -M ".current_version")
-curl --silent --location https://releases.hashicorp.com/terraform/${TERRAFORM_LATEST_VERSION}/terraform_${TERRAFORM_LATEST_VERSION}_linux_amd64.zip --output /tmp/terraform_linux_amd64.zip
+curl --silent --location "https://releases.hashicorp.com/terraform/${TERRAFORM_LATEST_VERSION}/terraform_${TERRAFORM_LATEST_VERSION}_linux_amd64.zip" --output /tmp/terraform_linux_amd64.zip
 unzip -o /tmp/terraform_linux_amd64.zip -d /usr/local/bin/
 ```
 
@@ -101,7 +101,7 @@ Start 3 VMs (one master and 2 workers) where the k8s will be installed.
 Generate ssh keys if not exists:
 
 ```bash
-test -f $HOME/.ssh/id_rsa || ( install -m 0700 -d $HOME/.ssh && ssh-keygen -b 2048 -t rsa -f $HOME/.ssh/id_rsa -q -N "" )
+test -f "${HOME}/.ssh/id_rsa" || (install -m 0700 -d "${HOME}/.ssh" && ssh-keygen -b 2048 -t rsa -f "${HOME}/.ssh/id_rsa" -q -N "")
 # ssh-agent must be running...
 test -n "$SSH_AUTH_SOCK" || eval `ssh-agent`
 if [ "`ssh-add -l`" = "The agent has no identities." ]; then ssh-add; fi
@@ -256,7 +256,7 @@ kube-system   tiller-deploy-dbb85cb99-z4c47   1/1     Running   0          28s
 
 ## Install Rook
 
-![Rook Architecture](https://raw.githubusercontent.com/rook/rook/master/Documentation/media/kubernetes.png
+![Rook Architecture](https://raw.githubusercontent.com/rook/rook/2f72ba77ad8c67e6cfb3fa2ef73d520f7ea516ad/Documentation/media/kubernetes.png
 "Rook Architecture")
 
 Install [Rook](https://rook.io/) Operator ([Ceph](https://ceph.com/en/)
@@ -1578,5 +1578,3 @@ sed -i "/read NAMESPACE/d" ./samples/bookinfo/platform/kube/cleanup.sh
   * [Using Istio Workshop by Layer5.io](https://github.com/leecalcote/istio-service-mesh-workshop)
 
   * [Istio Workshop by Ray Tsang](https://github.com/retroryan/istio-workshop)
-
-  * [Amazon EKS Workshop - Service Mesh with Istio](https://eksworkshop.com/servicemesh_with_istio/)

@@ -10,9 +10,6 @@ kubeconfig.conf
 # README.sh script
 README.sh
 
-# release-it configuration file
-.release-it.yml
-
 # nohup output
 nohup.out
 

@@ -4,11 +4,11 @@ trigger:
   - master
 
 pool:
-  vmImage: 'Ubuntu-16.04'
+  vmImage: "Ubuntu-16.04"
 
 steps:
   - bash: |
       ./tests/ci_test.sh
     env:
       SHELL: /bin/bash
-    displayName: 'Tests'
+    displayName: "Tests"
