@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.2.0](https://github.com/ruzickap/k8s-istio-demo/compare/v0.1.1...v0.2.0) (2024-07-11)
+
+
+### Features
+
+* add GitHub default templates ([#21](https://github.com/ruzickap/k8s-istio-demo/issues/21)) ([2bd269a](https://github.com/ruzickap/k8s-istio-demo/commit/2bd269ac672f0ff366f1d46a19b93164bf80097c))
+* **gha:** add links checker ([#18](https://github.com/ruzickap/k8s-istio-demo/issues/18)) ([5c23a80](https://github.com/ruzickap/k8s-istio-demo/commit/5c23a808fd4a77eeab4cfc249b619225ab58a1dd))
+* **gh:** add default GitHub repo files ([#16](https://github.com/ruzickap/k8s-istio-demo/issues/16)) ([352d525](https://github.com/ruzickap/k8s-istio-demo/commit/352d525c11175978081c71182a10d8edb1cb7a57))
+* **gh:** add default GitHub repo files ([#17](https://github.com/ruzickap/k8s-istio-demo/issues/17)) ([a0aee1b](https://github.com/ruzickap/k8s-istio-demo/commit/a0aee1b5af86fb6708ea22cf826de9255367d46a))
+* **gha:** unify GHA - renovate, megalinter, markdown, and others ([#12](https://github.com/ruzickap/k8s-istio-demo/issues/12)) ([d7c20eb](https://github.com/ruzickap/k8s-istio-demo/commit/d7c20eb8e989840429ae45207cd410b36d939d23))
+
+
+### Bug Fixes
+
+* **links:** add to static.gitbook.com to .lycheeignore ([#19](https://github.com/ruzickap/k8s-istio-demo/issues/19)) ([9a264af](https://github.com/ruzickap/k8s-istio-demo/commit/9a264af201ba003b91571f7e891a14d5c06c8ede))
+* **url:** fix badge url ([#15](https://github.com/ruzickap/k8s-istio-demo/issues/15)) ([2445b83](https://github.com/ruzickap/k8s-istio-demo/commit/2445b83a439335d0238a32e17c2be3b937776592))
+
 ## [v0.1.1](https://github.com/ruzickap/k8s-istio-demo/compare/v0.1.0...v0.1.1) (2021-12-20)
 
 - Fix linter issues [`#10`](https://github.com/ruzickap/k8s-istio-demo/pull/10)
